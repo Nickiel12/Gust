@@ -5,13 +5,23 @@
 option=$(echo -e "add/stage\nstatus\nunadd/unstage (reset)\ncommit" | gum filter)
 echo "your choice was $option"
 
-formatter(){
+git_status_filter(){
     input=$1
 
+    
+
     if [[ $input == "??"* ]]; then
-        echo $(gum style --foreground 4 ${input:3})
+        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
+            echo $(gum style --foreground 4 ${input:3})
+        fi
+    elif [[ $input == "MM"* ]]; then
+        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
+            echo $(gum style --foreground 11 ${input:2});
+        fi
     else 
-        echo $(gum style --foreground 11 ${input:2})
+        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:2}")" ]; then 
+            echo $(gum style --foreground 11 ${input:2})
+        fi
     fi
 }
 
@@ -29,8 +39,8 @@ remove_style(){
 
 case $option in
     "add/stage") 
-        export -f formatter
-        selection=`git status --short | xargs -I{} bash -c 'formatter "{}"' _ | gum choose --no-limit`
+        export -f git_status_filter
+        selection=`git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | gum choose --no-limit`
         git add $(remove_style "$selection")
         ;;
     "unadd/unstage (reset)")
@@ -42,13 +52,14 @@ case $option in
         elif [ "$selection" = "None" ]; then
             echo "None selected - skipping"
         else
-            git reset "$selection"
+            echo "$selection" | xargs -I{} git reset HEAD -- "{}"
         fi
         ;;
     "status")
         git status
         ;;
     "commit")
+
         ;;
 esac
 
