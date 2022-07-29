@@ -2,7 +2,7 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-option=$(echo -e "add\nstatus\ncommit" | gum filter)
+option=$(echo -e "add/stage\nstatus\nunadd/unstage (reset)\ncommit" | gum filter)
 echo "your choice was $option"
 
 formatter(){
@@ -15,13 +15,35 @@ formatter(){
     fi
 }
 
+colorizer(){
+    input=$1
+    color=$2
+
+    echo $(gum style --foreground $color $input)
+}
+
+remove_style(){
+    echo $(echo "$1" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
+}
+
 
 case $option in
-    "add") 
+    "add/stage") 
         export -f formatter
         selection=`git status --short | xargs -I{} bash -c 'formatter "{}"' _ | gum choose --no-limit`
-        git add $(echo "$selection" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
-
+        git add $(remove_style "$selection")
+        ;;
+    "unadd/unstage (reset)")
+        export -f colorizer
+        selection=`git diff --staged --name-only HEAD | xargs -I{} bash -c 'colorizer "{}" 9' _ | sed "$ a $(colorizer None 10)" | gum choose --no-limit`
+        selection=$(remove_style "$selection")
+        if [ -z "$selection" ]; then
+            echo "no files staged to remove!"
+        elif [ "$selection" = "None" ]; then
+            echo "None selected - skipping"
+        else
+            git reset "$selection"
+        fi
         ;;
     "status")
         git status
