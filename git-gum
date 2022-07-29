@@ -2,7 +2,7 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-option=$(echo -e "add\nsubtract\ncommit" | gum filter)
+option=$(echo -e "add\nstatus\ncommit" | gum filter)
 echo "your choice was $option"
 
 formatter(){
@@ -15,5 +15,18 @@ formatter(){
     fi
 }
 
-export -f formatter
-#git status --short | xargs -I{} bash -c 'formatter "{}"' _ | gum choose --no-limit
+
+case $option in
+    "add") 
+        export -f formatter
+        selection=`git status --short | xargs -I{} bash -c 'formatter "{}"' _ | gum choose --no-limit`
+        git add $(echo "$selection" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
+
+        ;;
+    "status")
+        git status
+        ;;
+    "commit")
+        ;;
+esac
+
