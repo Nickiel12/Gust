@@ -2,25 +2,37 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-option=$(echo -e "add/stage\nstatus\nunadd/unstage (reset)\ncommit" | gum filter)
-echo "your choice was $option"
+options="add reset commit"
+
+if [ ! -z $1 ]; then
+    input="$1"
+    if [[ $input == "--help" ]]; then
+        echo Available options are: "$options" 
+        exit 0
+    fi
+
+    case "$input" in 
+       --add | add ) option="add"  ;;
+    esac
+else
+    option=$(echo "$options" | gum filter)
+    echo "your choice was $option"
+fi
 
 git_status_filter(){
     input=$1
 
-    
-
     if [[ $input == "??"* ]]; then
         if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
-            echo $(gum style --foreground 4 ${input:3})
+            echo $(gum style --foreground 11 ${input:3})
         fi
     elif [[ $input == "MM"* ]]; then
         if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
-            echo $(gum style --foreground 11 ${input:2});
+            echo $(gum style --foreground 10 ${input:2});
         fi
     else 
         if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:2}")" ]; then 
-            echo $(gum style --foreground 11 ${input:2})
+            echo $(gum style --foreground 14 ${input:2})
         fi
     fi
 }
@@ -38,12 +50,12 @@ remove_style(){
 
 
 case $option in
-    "add/stage") 
+    add ) 
         export -f git_status_filter
         selection=`git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | gum choose --no-limit`
         git add $(remove_style "$selection")
         ;;
-    "unadd/unstage (reset)")
+    reset )
         export -f colorizer
         selection=`git diff --staged --name-only HEAD | xargs -I{} bash -c 'colorizer "{}" 9' _ | sed "$ a $(colorizer None 10)" | gum choose --no-limit`
         selection=$(remove_style "$selection")
@@ -55,7 +67,7 @@ case $option in
             echo "$selection" | xargs -I{} git reset HEAD -- "{}"
         fi
         ;;
-    "status")
+    status )
         git status
         ;;
     "commit")
