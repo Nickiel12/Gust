@@ -2,7 +2,7 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-options="add reset commit"
+options=$(echo -e "add\nreset\ncommit")
 
 if [ ! -z $1 ]; then
     input="$1"
