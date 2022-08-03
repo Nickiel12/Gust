@@ -2,38 +2,38 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-options=$(echo -e "add\nreset\ncommit\nstatus")
+OPTIONS=$(echo -e "add\nreset\ncommit\nstatus")
 
 if [ ! -z $1 ]; then
-    input="$1"
-    if [[ $input == "--help" ]]; then
-        echo Available options are: "$options" 
+    INPUT="$1"
+    if [[ $INPUT == "--help" ]]; then
+        echo Available options are: "$OPTIONS" 
         exit 0
     fi
 
-    case "$input" in 
-       --add | add ) option="add"  ;;
-       --reset | reset) option="reset" ;;
-       --status | status) option="status" ;;
-       --commit | commit) option="commit" ;;
+    case "$INPUT" in 
+       --add | add ) OPTION="add"  ;;
+       --reset | reset) OPTION="reset" ;;
+       --status | status) OPTION="status" ;;
+       --commit | commit) OPTION="commit" ;;
     esac
 else
-    option=$(echo "$options" | gum filter)
-    echo "your choice was $option"
+    OPTION=$(echo "$OPTIONS" | gum filter)
+    echo "your choice was $OPTION"
 fi
 
 git_status_filter(){
-    input=$1
+    INPUT=$1
 
-    if [[ $input == "??"* ]]; then
-            echo $(gum style --foreground 11 ${input:3})
-    elif [[ $input == "MM"* ]]; then
-        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
-            echo $(gum style --foreground 10 ${input:2});
+    if [[ $INPUT == "??"* ]]; then
+            echo $(gum style --foreground 11 ${INPUT:3})
+    elif [[ $INPUT == "MM"* ]]; then
+        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${INPUT:3}")" ]; then
+            echo $(gum style --foreground 10 ${INPUT:2});
         fi
     else 
-        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:2}")" ]; then 
-            echo $(gum style --foreground 14 ${input:2})
+        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${INPUT:2}")" ]; then 
+            echo $(gum style --foreground 14 ${INPUT:2})
         fi
     fi
 }
@@ -42,30 +42,30 @@ remove_style(){
     echo $(echo "$1" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
 }
 
-none_text=$(gum style --foreground 10 None)
-case $option in
+NONE_TEXT=$(gum style --foreground 10 None)
+case $OPTION in
     add ) 
         export -f git_status_filter
-        selection=$(git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | sed '$a'"$none_text" | gum choose --no-limit)
-        if [ -z "$selection" ]; then
+        SELECTION=$(git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | sed '$a'"$NONE_TEXT" | gum choose --no-limit)
+        if [ -z "$SELECTION" ]; then
             echo "No files selected"
         else
-            git add $(remove_style "$selection")
+            git add $(remove_style "$SELECTION")
         fi
         ;;
     reset )
         #basically, get all staged files - if none, say so-, color them, add "none" to the end, get the selection
         #check if selection is "None" or empty and exit if so, else pass it to git reset
-        git_output=$(git status --short | grep '^[MACD]')
-        if [ ! -z "$git_output" ]; then
-            selection=`$git_output | xargs gum style --foreground 9 | sed '$a'"$none_text" | gum choose --no-limit`
-            selection=$(remove_style "$selection")
-            if [ -z "$selection" ]; then
+        GIT_OUTPUT=$(git status --short | grep '^[MACD]')
+        if [ ! -z "$GIT_OUTPUT" ]; then
+            SELECTION=`$GIT_OUTPUT | xargs gum style --foreground 9 | sed '$a'"$NONE_TEXT" | gum choose --no-limit`
+            SELECTION=$(remove_style "$SELECTION")
+            if [ -z "$SELECTION" ]; then
                 echo "no files staged to remove!"
-            elif [ "$selection" = "None" ]; then
+            elif [ "$SELECTION" = "None" ]; then
                 echo "None selected - skipping"
             else
-                echo "$selection" | xargs -I{} git reset HEAD -- "{}"
+                echo "$SELECTION" | xargs -I{} git reset HEAD -- "{}"
             fi
         else
             echo $(gum style --foreground 10 "No files staged right now" )
