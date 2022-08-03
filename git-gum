@@ -2,7 +2,7 @@
 #git commit -m "$(gum input --width 50 --placeholder "Summary of changes")" \
 #           -m "$(gum write --width 80 --placeholder "Details of changes")"
 
-options=$(echo -e "add\nreset\ncommit")
+options=$(echo -e "add\nreset\ncommit\nstatus")
 
 if [ ! -z $1 ]; then
     input="$1"
@@ -13,6 +13,9 @@ if [ ! -z $1 ]; then
 
     case "$input" in 
        --add | add ) option="add"  ;;
+       --reset | reset) option="reset" ;;
+       --status | status) option="status" ;;
+       --commit | commit) option="commit" ;;
     esac
 else
     option=$(echo "$options" | gum filter)
@@ -35,13 +38,6 @@ git_status_filter(){
     fi
 }
 
-colorizer(){
-    input=$1
-    color=$2
-
-    echo $(gum style --foreground $color $input)
-}
-
 remove_style(){
     echo $(echo "$1" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
 }
@@ -50,7 +46,7 @@ none_text=$(gum style --foreground 10 None)
 case $option in
     add ) 
         export -f git_status_filter
-        selection=$(git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | sed "$ a $(colorizer None 9)" | gum choose --no-limit)
+        selection=$(git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | sed '$a'"$none_text" | gum choose --no-limit)
         if [ -z "$selection" ]; then
             echo "No files selected"
         else
