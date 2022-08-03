@@ -23,9 +23,7 @@ git_status_filter(){
     input=$1
 
     if [[ $input == "??"* ]]; then
-        if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
             echo $(gum style --foreground 11 ${input:3})
-        fi
     elif [[ $input == "MM"* ]]; then
         if [ ! -z "$(git ls-files . --exclude-standard --others -m | grep "${input:3}")" ]; then
             echo $(gum style --foreground 10 ${input:2});
@@ -48,23 +46,33 @@ remove_style(){
     echo $(echo "$1" | sed 's/\x1b\[[0-9;]*[mGKHF]//g')
 }
 
-
+none_text=$(gum style --foreground 10 None)
 case $option in
     add ) 
         export -f git_status_filter
-        selection=`git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | gum choose --no-limit`
-        git add $(remove_style "$selection")
+        selection=$(git status --short | xargs -I{} bash -c 'git_status_filter "{}"' _ | sed "$ a $(colorizer None 9)" | gum choose --no-limit)
+        if [ -z "$selection" ]; then
+            echo "No files selected"
+        else
+            git add $(remove_style "$selection")
+        fi
         ;;
     reset )
-        export -f colorizer
-        selection=`git diff --staged --name-only HEAD | xargs -I{} bash -c 'colorizer "{}" 9' _ | sed "$ a $(colorizer None 10)" | gum choose --no-limit`
-        selection=$(remove_style "$selection")
-        if [ -z "$selection" ]; then
-            echo "no files staged to remove!"
-        elif [ "$selection" = "None" ]; then
-            echo "None selected - skipping"
+        #basically, get all staged files - if none, say so-, color them, add "none" to the end, get the selection
+        #check if selection is "None" or empty and exit if so, else pass it to git reset
+        git_output=$(git status --short | grep '^[MACD]')
+        if [ ! -z "$git_output" ]; then
+            selection=`$git_output | xargs gum style --foreground 9 | sed '$a'"$none_text" | gum choose --no-limit`
+            selection=$(remove_style "$selection")
+            if [ -z "$selection" ]; then
+                echo "no files staged to remove!"
+            elif [ "$selection" = "None" ]; then
+                echo "None selected - skipping"
+            else
+                echo "$selection" | xargs -I{} git reset HEAD -- "{}"
+            fi
         else
-            echo "$selection" | xargs -I{} git reset HEAD -- "{}"
+            echo $(gum style --foreground 10 "No files staged right now" )
         fi
         ;;
     status )
