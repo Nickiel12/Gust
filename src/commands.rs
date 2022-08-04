@@ -5,7 +5,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn get_from_string(input: &String) -> Option<Self> {
+    pub fn get_from_string(input: String) -> Option<Self> {
         match input.to_lowercase().as_str() {
             "add" => Some(Commands::Add),
             "reset" => Some(Commands::Reset),
