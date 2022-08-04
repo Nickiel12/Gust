@@ -1,17 +1,24 @@
 use crate::commands::Commands;
-use std::{process::Command, str};
+use std::process::Command;
 
 pub fn get_git_action() -> Option<Commands> {
-    let user_response = Command::new("gum")
+    let prompt_cmd = Command::new("gum")
         .arg("filter")
         .arg(Commands::Add.to_string())
         .arg(Commands::Reset.to_string())
         .arg(Commands::Commit.to_string())
-        .output()
-        .expect("I'm out of gum!!!");
+        .spawn()
+        .unwrap();
+        //.expect("I'm out of gum!!!");
 
-    match (str::from_utf8(&user_response.stdout)) {
-        Ok(value) => return Commands::get_from_string(value.to_string()),
-        Err(_) => return None,
+    let user_response = prompt_cmd.wait_with_output().unwrap();    
+
+    if user_response.status.success() {
+        let response = String::from_utf8_lossy(&user_response.stdout);
+        print!("{}", response);
+        //return Commands::get_from_string(response);
+    } else {
+        print!("choose command failed");
     }
+    return None;
 }

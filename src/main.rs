@@ -14,7 +14,7 @@ fn main() {
     let args = CliArguments::parse();
 
     let command;
-    match (args.command) {
+    match args.command {
         Some(com) => command = com,
         None => command = cli::get_git_action().unwrap().to_string(),
     }
