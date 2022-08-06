@@ -1,3 +1,9 @@
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
+use colored::Colorize;
+
+#[derive(EnumIter)]
 pub enum Commands {
     Add,
     Reset,
@@ -5,12 +11,12 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn get_from_string(input: String) -> Option<Self> {
+    pub fn from_string(input: String) -> Result<Self, String> {
         match input.to_lowercase().as_str() {
-            "add" => Some(Commands::Add),
-            "reset" => Some(Commands::Reset),
-            "commit" => Some(Commands::Commit),
-            _ => None,
+            "add" => Ok(Commands::Add),
+            "reset" => Ok(Commands::Reset),
+            "commit" => Ok(Commands::Commit),
+            _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
 
@@ -20,5 +26,14 @@ impl Commands {
             Commands::Reset => String::from("reset"),
             Commands::Commit => String::from("commit"),
         }
+    }
+
+    pub fn get_gum_string() -> String {
+        let mut output = String::new();
+        for item in Commands::iter() {
+            output += "\n";
+            output += item.to_string().as_str();
+        }
+        return output;
     }
 }
