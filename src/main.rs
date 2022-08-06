@@ -1,7 +1,10 @@
 mod commands;
 pub use commands::Commands;
 
+mod utils;
+
 mod cli;
+mod cli_menus;
 
 use clap::Parser;
 use colored::Colorize;
@@ -25,7 +28,7 @@ fn main() {
             }
         }
         None => {
-            command = match cli::get_git_action() {
+            command = match cli::filter_choice_cli(Commands::get_gum_string()) {
                 Ok(com) => com,
                 Err(val) => {
                     println!("{}", val);
@@ -35,4 +38,9 @@ fn main() {
         }
     }
     println!("{}", command.to_string());
+    let result = match command {
+        Commands::Add => cli_menus::git_add_cli(),
+        Commands::Reset => todo!(),
+        Commands::Commit => todo!(),
+    };
 }
