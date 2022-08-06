@@ -1,8 +1,6 @@
 use crate::cli;
-use crate::commands::Commands;
-use crate::utils;
 
-use colored::Colorize;
+use colored::{ColoredString, Colorize};
 use std::process::{Command, Stdio};
 
 pub fn git_add_cli() -> Result<(), String> {
@@ -22,7 +20,7 @@ pub fn git_add_cli() -> Result<(), String> {
             return Ok(());
         }
 
-        let mut choices = String::new();
+        let mut choices = Vec::<String>::new();
         for line in status_output.lines() {
             //println!("debug line: {}", line);
             match line.chars().nth(1).unwrap() {
@@ -32,8 +30,7 @@ pub fn git_add_cli() -> Result<(), String> {
                 }
                 // Not tracked
                 '?' => {
-                    choices += "\n";
-                    choices += line[3..].bright_green().to_string().as_str();
+                    choices.push(line[3..].bright_green().to_string());
                 }
                 // Modified from head, but not staged
                 'M' => {
@@ -41,13 +38,11 @@ pub fn git_add_cli() -> Result<(), String> {
                     match line.chars().nth(0).unwrap() {
                         // No staged changes, Added
                         ' ' | 'A' => {
-                            choices += "\n";
-                            choices += line[3..].green().to_string().as_str();
+                            choices.push(line[3..].green().to_string());
                         }
                         // Modified, Deleted, Renamed, Updated but merged
                         'M' | 'D' | 'R' | 'U' => {
-                            choices += "\n";
-                            choices += line[3..].yellow().to_string().as_str();
+                            choices.push(line[3..].yellow().to_string());
                         }
                         // Git was empty, but not?
                         _ => {
@@ -60,22 +55,23 @@ pub fn git_add_cli() -> Result<(), String> {
                 }
                 // Delete, Rename
                 'D' | 'R' => {
-                    choices += "\n";
-                    choices += line[3..].bright_yellow().to_string().as_str();
+                    choices.push(line[3..].bright_yellow().to_string());
                 }
                 // Added
                 'A' => {
-                    choices += "\n";
-                    choices += line[3..].bright_red().to_string().as_str();
+                    choices.push(line[3..].bright_red().to_string());
                 }
                 _ => {
                     println!("ding: {}", line);
                 }
             }
         }
-        println!("your choices sir: \n{}", choices);
-        let usr_selected = utils::strip_colors(cli::choice_no_limit(choices, true).unwrap());
-        println!("You decided on: {}", usr_selected);
+        println!("your choices sir: \n{:?}", choices);
+        let usr_selected = match cli::choice_no_limit(choices.join("\n"), true) {
+            Ok(choice) => ColoredString::from(choice.as_str()).clear(),
+            Err(error) => return Err(error),
+        };
+        println!("You decided on: {:?}", usr_selected);
         Ok(())
     } else {
         return Err(String::from_utf8_lossy(&git_status.stderr).to_string());

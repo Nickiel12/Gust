@@ -1,8 +1,6 @@
 mod commands;
 pub use commands::Commands;
 
-mod utils;
-
 mod cli;
 mod cli_menus;
 
