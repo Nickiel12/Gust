@@ -1,6 +1,8 @@
 mod commands;
 pub use commands::Commands;
 
+mod utils;
+
 mod cli;
 mod cli_menus;
 
@@ -35,7 +37,14 @@ fn main() {
             }
         }
     }
-    println!("{}", command.to_string());
+
+    println!(
+        "{} {} {}",
+        "Opening".cyan(),
+        command.to_string().bright_cyan(),
+        "menu:".cyan()
+    );
+
     let result = match command {
         Commands::Add => cli_menus::git_add_cli(),
         Commands::Reset => todo!(),

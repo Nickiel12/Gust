@@ -1,6 +1,6 @@
 use crate::cli;
 
-use colored::{ColoredString, Colorize};
+use colored::Colorize;
 use std::process::{Command, Stdio};
 
 pub fn git_add_cli() -> Result<(), String> {
@@ -66,13 +66,26 @@ pub fn git_add_cli() -> Result<(), String> {
                 }
             }
         }
-        println!("your choices sir: \n{:?}", choices);
+
         let usr_selected = match cli::choice_no_limit(choices.join("\n"), true) {
-            Ok(choice) => ColoredString::from(choice.as_str()).clear(),
+            Ok(choice) => choice,
             Err(error) => return Err(error),
         };
-        println!("You decided on: {:?}", usr_selected);
-        Ok(())
+        return match usr_selected {
+            None => {
+                println!("None selected, returning");
+                Ok(())
+            }
+            Some(choice) => {
+                println!(
+                    "{}\n{}",
+                    "Adding to Staged:".bright_white().bold(),
+                    format!("\t{}", choice).green()
+                );
+
+                return cli::git_add(choice);
+            }
+        };
     } else {
         return Err(String::from_utf8_lossy(&git_status.stderr).to_string());
     }
