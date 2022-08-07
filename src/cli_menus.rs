@@ -59,10 +59,7 @@ pub fn git_add_cli() -> Result<(), String> {
         }
     }
 
-    let usr_selected = match cli::choice_no_limit(choices, true) {
-        Ok(choice) => choice,
-        Err(error) => return Err(error),
-    };
+    let usr_selected = cli::choice_no_limit(choices, true)?;
     return match usr_selected {
         None => {
             println!("None selected, returning");
@@ -72,6 +69,29 @@ pub fn git_add_cli() -> Result<(), String> {
     };
 }
 
-//pub fn git_reset_cli() -> Result<(), String> {
-//let status_opt = cli::git_status_short()?;
-//}
+pub fn git_reset_cli() -> Result<(), String> {
+    let status_opt = cli::git_status_short()?;
+
+    return match status_opt {
+        None => {
+            println!("{}", "No files staged".bright_green());
+            Ok(())
+        }
+        Some(status) => {
+            let mut choices = Vec::<String>::new();
+            for line in status.lines() {
+                match line.chars().nth(0).unwrap() {
+                    'M' | 'A' | 'C' | 'D' => choices.push(line[3..].yellow().to_string()),
+                    _ => {}
+                }
+            }
+            return match cli::choice_no_limit(choices, true)? {
+                None => {
+                    println!("None selected, returning");
+                    Ok(())
+                }
+                Some(choice) => return cli::git_reset(choice),
+            };
+        }
+    };
+}

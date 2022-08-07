@@ -69,6 +69,10 @@ pub fn git_add(input: Vec<String>) -> Result<(), String> {
     }
 }
 
+pub fn git_reset(input: Vec<String>) -> Result<(), String> {
+    Ok(())
+}
+
 pub fn git_status_short() -> Result<Option<String>, String> {
     let git_status_cmd = Command::new("git")
         .arg("status")
