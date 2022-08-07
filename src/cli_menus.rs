@@ -67,7 +67,7 @@ pub fn git_add_cli() -> Result<(), String> {
             }
         }
 
-        let usr_selected = match cli::choice_no_limit(choices.join("\n"), true) {
+        let usr_selected = match cli::choice_no_limit(choices, true) {
             Ok(choice) => choice,
             Err(error) => return Err(error),
         };
@@ -76,15 +76,7 @@ pub fn git_add_cli() -> Result<(), String> {
                 println!("None selected, returning");
                 Ok(())
             }
-            Some(choice) => {
-                println!(
-                    "{}\n{}",
-                    "Adding to Staged:".bright_white().bold(),
-                    format!("\t{}", choice).green()
-                );
-
-                return cli::git_add(choice);
-            }
+            Some(choice) => cli::git_add(choice),
         };
     } else {
         return Err(String::from_utf8_lossy(&git_status.stderr).to_string());

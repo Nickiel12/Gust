@@ -15,6 +15,10 @@ struct CliArguments {
 }
 
 fn main() {
+    println!(
+        "{}",
+        "have you added support for merge conflicts yet?".bright_red()
+    );
     let args = CliArguments::parse();
 
     let command;

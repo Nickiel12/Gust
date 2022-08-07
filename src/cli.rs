@@ -2,75 +2,61 @@ use crate::commands::Commands;
 use crate::utils;
 
 use colored::Colorize;
+use console;
+use dialoguer::{theme, FuzzySelect, MultiSelect};
 use std::io::Write;
 use std::process::{Command, Stdio};
 
 pub fn filter_choice_cli(choices: String) -> Result<Commands, String> {
-    let mut prompt_cmd = Command::new("gum")
-        .arg("filter")
-        .stdout(Stdio::piped())
-        .stdin(Stdio::piped())
-        .spawn()
-        .expect("I'm out of gum!!!");
+    let items = choices.split_terminator("\n").collect::<Vec<_>>();
+    let selection = FuzzySelect::with_theme(&theme::ColorfulTheme::default())
+        .items(&items)
+        .with_prompt("Please choose a menu:")
+        .default(1)
+        .interact_on_opt(&console::Term::stderr())
+        .expect("Couldn't fuzzy search");
 
-    let mut stdin = prompt_cmd.stdin.take().expect("failed to open stdin");
-    std::thread::spawn(move || {
-        stdin
-            .write_all(choices.as_bytes())
-            .expect("Failed to write to stdin");
-    });
-
-    let user_response = prompt_cmd.wait_with_output().unwrap();
-
-    if user_response.status.success() {
-        let response = String::from_utf8_lossy(&user_response.stdout)
-            .to_string()
-            .replace("\n", "");
-        Commands::from_string(response)
-    } else {
-        return Err(String::from_utf8_lossy(&user_response.stderr).to_string());
+    match selection {
+        Some(index) => Commands::from_string(items[index].to_string()),
+        None => Err("No item was selected!".green().to_string()),
     }
 }
 
-pub fn choice_no_limit(mut choices: String, has_none: bool) -> Result<Option<String>, String> {
-    let mut prompt_cmd = Command::new("gum")
-        .arg("choose")
-        .arg("--no-limit")
-        .stdout(Stdio::piped())
-        .stdin(Stdio::piped())
-        .spawn()
-        .expect("I couldn't chose what gum to have!");
-
-    let mut stdin = prompt_cmd.stdin.take().expect("failed to open stdin");
+pub fn choice_no_limit(
+    mut choices: Vec<String>,
+    has_none: bool,
+) -> Result<Option<Vec<String>>, String> {
     if has_none {
-        choices += "\n";
-        choices += "None".bright_white().to_string().as_str();
+        choices.push("None".to_string());
     }
-    std::thread::spawn(move || {
-        stdin
-            .write_all(choices.as_bytes())
-            .expect("Failed to write to stdin");
-    });
 
-    let user_response = prompt_cmd.wait_with_output().unwrap();
+    let selected: Option<Vec<usize>> = MultiSelect::new()
+        .items(&choices)
+        .with_prompt("Please choose files to stage")
+        .interact_on_opt(&console::Term::stderr())
+        .expect("Couldn't make a choice");
 
-    if user_response.status.success() {
-        let response =
-            utils::strip_colors(String::from_utf8_lossy(&user_response.stdout).to_string());
-        if response.contains("None") {
-            return Ok(None);
-        } else {
-            Ok(Some(response))
+    match selected {
+        None => Err("No items were selected".to_string()),
+        Some(indexes) => {
+            let mut all_choices = Vec::<String>::new();
+            all_choices.reserve(indexes.len());
+            for i in indexes.into_iter() {
+                all_choices.push(utils::strip_colors(choices[i].to_string()).to_owned());
+            }
+            if all_choices.contains(&choices[choices.len() - 1].to_string()) {
+                Ok(None)
+            } else {
+                Ok(Some(all_choices))
+            }
         }
-    } else {
-        Err(String::from_utf8_lossy(&user_response.stderr).to_string())
     }
 }
 
-pub fn git_add(input: String) -> Result<(), String> {
+pub fn git_add(input: Vec<String>) -> Result<(), String> {
     let git_add_cmd = Command::new("git")
         .arg("add")
-        .args(input.split_terminator("\n").collect::<Vec<_>>())
+        .args(input)
         .spawn()
         .expect("Couldn't run `git add`");
 
