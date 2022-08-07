@@ -68,3 +68,25 @@ pub fn git_add(input: Vec<String>) -> Result<(), String> {
         Ok(())
     }
 }
+
+pub fn git_status_short() -> Result<Option<String>, String> {
+    let git_status_cmd = Command::new("git")
+        .arg("status")
+        .arg("--short")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git add!");
+
+    let git_status = git_status_cmd.wait_with_output().unwrap();
+
+    if git_status.status.success() {
+        let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
+        if status_output == "" {
+            Ok(None)
+        } else {
+            Ok(Some(status_output))
+        }
+    } else {
+        Err(String::from_utf8_lossy(&git_status.stderr).to_string())
+    }
+}
