@@ -51,7 +51,7 @@ fn main() {
 
     let result = match command {
         Commands::Add => cli_menus::git_add_cli().unwrap(),
-        Commands::Reset => todo!(),
+        Commands::Reset => cli_menus::git_reset_cli().unwrap(),
         Commands::Commit => todo!(),
     };
 }

@@ -1,4 +1,3 @@
-use colored::Colorize;
 use regex;
 
 pub fn strip_colors(input: String) -> String {

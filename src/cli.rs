@@ -4,7 +4,6 @@ use crate::utils;
 use colored::Colorize;
 use console;
 use dialoguer::{theme, FuzzySelect, MultiSelect};
-use std::io::Write;
 use std::process::{Command, Stdio};
 
 pub fn filter_choice_cli(choices: String) -> Result<Commands, String> {
@@ -70,7 +69,19 @@ pub fn git_add(input: Vec<String>) -> Result<(), String> {
 }
 
 pub fn git_reset(input: Vec<String>) -> Result<(), String> {
-    Ok(())
+    let git_reset_cmd = Command::new("git")
+        .arg("reset")
+        .args(input)
+        .spawn()
+        .expect("Couldn't run `git reset`");
+
+    let output = git_reset_cmd.wait_with_output().unwrap();
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
+    }
 }
 
 pub fn git_status_short() -> Result<Option<String>, String> {
