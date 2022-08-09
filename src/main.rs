@@ -53,5 +53,7 @@ fn main() {
         Commands::Add => cli_menus::git_add_cli().unwrap(),
         Commands::Reset => cli_menus::git_reset_cli().unwrap(),
         Commands::Commit => todo!(),
+        Commands::Push => cli_menus::git_push_cli().unwrap(),
+        Commands::Pull => cli_menus::git_pull_cli().unwrap(),
     };
 }

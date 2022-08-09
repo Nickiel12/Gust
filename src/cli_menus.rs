@@ -95,3 +95,13 @@ pub fn git_reset_cli() -> Result<(), String> {
         }
     };
 }
+
+pub fn git_pull_cli() -> Result<(), String> {
+    cli::git_pull()?;
+    Ok(())
+}
+
+pub fn git_push_cli() -> Result<(), String> {
+    cli::git_push()?;
+    Ok(())
+}

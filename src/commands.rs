@@ -8,6 +8,8 @@ pub enum Commands {
     Add,
     Reset,
     Commit,
+    Push,
+    Pull,
 }
 
 impl Commands {
@@ -16,6 +18,8 @@ impl Commands {
             "add" => Ok(Commands::Add),
             "reset" => Ok(Commands::Reset),
             "commit" => Ok(Commands::Commit),
+            "push" => Ok(Commands::Push),
+            "pull" => Ok(Commands::Pull),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
@@ -25,6 +29,8 @@ impl Commands {
             Commands::Add => String::from("add"),
             Commands::Reset => String::from("reset"),
             Commands::Commit => String::from("commit"),
+            Commands::Push => String::from("push"),
+            Commands::Pull => String::from("pull"),
         }
     }
 

@@ -52,6 +52,36 @@ pub fn choice_no_limit(
     }
 }
 
+pub fn git_pull() -> Result<(), String> {
+    let git_pull_cmd = Command::new("git")
+        .arg("pull")
+        .spawn()
+        .expect("Couldn't run `git pull`");
+
+    let output = git_pull_cmd.wait_with_output().unwrap();
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
+    }
+}
+
+pub fn git_push() -> Result<(), String> {
+    let git_push_cmd = Command::new("git")
+        .arg("push")
+        .spawn()
+        .expect("Couldn't run `git push`");
+
+    let output = git_push_cmd.wait_with_output().unwrap();
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
+    }
+}
+
 pub fn git_add(input: Vec<String>) -> Result<(), String> {
     let git_add_cmd = Command::new("git")
         .arg("add")
