@@ -52,7 +52,7 @@ fn main() {
     let result = match command {
         Commands::Add => cli_menus::git_add_cli().unwrap(),
         Commands::Reset => cli_menus::git_reset_cli().unwrap(),
-        Commands::Commit => todo!(),
+        Commands::Commit => cli_menus::git_commit_cli().unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
     };

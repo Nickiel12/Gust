@@ -3,8 +3,19 @@ use crate::utils;
 
 use colored::Colorize;
 use console;
-use dialoguer::{theme, FuzzySelect, MultiSelect};
+use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect};
 use std::process::{Command, Stdio};
+
+pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
+    match Confirm::new()
+        .with_prompt(prompt)
+        .interact_on_opt(&console::Term::stderr())
+        .expect("Couldn't confirm if user wanted to stage all changed files")
+    {
+        Some(choice) => return Ok(choice),
+        None => Err("An error occured, and no confirmation was gotten".to_string()),
+    }
+}
 
 pub fn filter_choice_cli(choices: String) -> Result<Commands, String> {
     let items = choices.split_terminator("\n").collect::<Vec<_>>();
@@ -94,6 +105,7 @@ pub fn git_add(input: Vec<String>) -> Result<(), String> {
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     } else {
+        println!("{}", "Files Staged!".bright_green());
         Ok(())
     }
 }
@@ -126,7 +138,7 @@ pub fn git_status_short() -> Result<Option<String>, String> {
 
     if git_status.status.success() {
         let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
-        if status_output == "" {
+        if status_output == "" || status_output == " " {
             Ok(None)
         } else {
             Ok(Some(status_output))
@@ -134,4 +146,29 @@ pub fn git_status_short() -> Result<Option<String>, String> {
     } else {
         Err(String::from_utf8_lossy(&git_status.stderr).to_string())
     }
+}
+
+pub fn git_commit(passed_options: Option<Vec<String>>) -> Result<(), String> {
+    let git_commit_cmd;
+    if passed_options.is_some() {
+        let options = passed_options.unwrap();
+        let opts = options.join(" ");
+        git_commit_cmd = Command::new("git")
+            .arg("commit")
+            .args(options)
+            .spawn()
+            .expect(format!("Couldn't call `git commit {}`!", opts).as_str());
+    } else {
+        git_commit_cmd = Command::new("git")
+            .arg("commit")
+            .spawn()
+            .expect("Couldn't call `git commit`!");
+    }
+
+    let output = git_commit_cmd.wait_with_output().unwrap();
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    }
+    Ok(())
 }

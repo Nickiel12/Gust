@@ -96,6 +96,65 @@ pub fn git_reset_cli() -> Result<(), String> {
     };
 }
 
+pub fn git_commit_cli() -> Result<(), String> {
+    let status_opt = cli::git_status_short()?;
+
+    fn no_staged() -> Result<(), String> {
+        match git_add_cli() {
+            Ok(_) => return Ok(()),
+            Err(val) => return Err(val),
+        }
+    }
+
+    let do_commit = match status_opt {
+        None => {
+            println!("{}", "No files staged".bright_yellow());
+            match no_staged() {
+                Ok(_) => true,
+                Err(_err) => false,
+            }
+            //if cli::ask_choice_cli("Would you like to commit all changed files?".to_string())? {
+            //    cli::git_commit(vec!["-a".to_string()])?;
+            //    true
+            //} else {
+            //    println!("{}", "Closing Commit menu".bright_green());
+            //    false
+        }
+        Some(status) => {
+            let mut choices = Vec::<String>::new();
+            for line in status.lines() {
+                match line.chars().nth(0).unwrap() {
+                    'M' | 'A' | 'C' | 'D' => choices.push(line[3..].yellow().to_string()),
+                    _ => {}
+                }
+            }
+            if choices.len() == 0 {
+                match no_staged() {
+                    Ok(_) => true,
+                    Err(_err) => false,
+                }
+            } else {
+                if cli::ask_choice_cli(format!(
+                    "{}:\n{}",
+                    "Commit the following files?",
+                    choices.join("\n")
+                ))? {
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+    };
+    if do_commit {
+        // Get commit type
+        // Get commit message
+        // Get advanced description
+        cli::git_commit(None)?;
+    }
+    Ok(())
+}
+
 pub fn git_pull_cli() -> Result<(), String> {
     cli::git_pull()?;
     Ok(())
