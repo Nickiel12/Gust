@@ -70,6 +70,12 @@ pub fn git_add_cli() -> Result<(), String> {
 }
 
 pub fn git_reset_cli() -> Result<(), String> {
+    println!(
+        "{} {} {}",
+        "Opening".green(),
+        "Reset".bold().green(),
+        "menu".green()
+    );
     let status_opt = cli::git_status_short()?;
 
     return match status_opt {
@@ -97,30 +103,29 @@ pub fn git_reset_cli() -> Result<(), String> {
 }
 
 pub fn git_commit_cli() -> Result<(), String> {
+    println!(
+        "{} {} {}",
+        "Opening".green(),
+        "Commit".bold().green(),
+        "menu".green()
+    );
     let status_opt = cli::git_status_short()?;
 
     fn no_staged() -> Result<(), String> {
-        match git_add_cli() {
-            Ok(_) => return Ok(()),
-            Err(val) => return Err(val),
+        if cli::ask_choice_cli("No files staged, would you like to add some?".to_string())? {
+            git_add_cli()
+        } else {
+            return Err("Git commit function failed at 'no_staged ask_choice_cli'".to_string());
         }
     }
 
     let do_commit = match status_opt {
         None => {
-            println!("{}", "No files staged".bright_yellow());
-            match no_staged() {
-                Ok(_) => true,
-                Err(_err) => false,
-            }
-            //if cli::ask_choice_cli("Would you like to commit all changed files?".to_string())? {
-            //    cli::git_commit(vec!["-a".to_string()])?;
-            //    true
-            //} else {
-            //    println!("{}", "Closing Commit menu".bright_green());
-            //    false
+            println!("{}", "No files changed since last commit".bright_yellow());
+            false
         }
         Some(status) => {
+            // Sort the return from git status
             let mut choices = Vec::<String>::new();
             for line in status.lines() {
                 match line.chars().nth(0).unwrap() {

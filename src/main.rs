@@ -42,13 +42,6 @@ fn main() {
         }
     }
 
-    println!(
-        "{} {} {}",
-        "Opening".cyan(),
-        command.to_string().bright_cyan(),
-        "menu:".cyan()
-    );
-
     let result = match command {
         Commands::Add => cli_menus::git_add_cli().unwrap(),
         Commands::Reset => cli_menus::git_reset_cli().unwrap(),

@@ -42,7 +42,7 @@ pub fn choice_no_limit(
 
     let selected: Option<Vec<usize>> = MultiSelect::new()
         .items(&choices)
-        .with_prompt("Please choose files to stage")
+        .with_prompt("Please choose files to stage:")
         .interact_on_opt(&console::Term::stderr())
         .expect("Couldn't make a choice");
 
@@ -138,7 +138,7 @@ pub fn git_status_short() -> Result<Option<String>, String> {
 
     if git_status.status.success() {
         let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
-        if status_output == "" || status_output == " " {
+        if status_output == " " || status_output.len() == 0 {
             Ok(None)
         } else {
             Ok(Some(status_output))
