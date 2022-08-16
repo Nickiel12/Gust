@@ -133,6 +133,7 @@ pub fn git_commit_cli() -> Result<(), String> {
                     _ => {}
                 }
             }
+            // check for staged changes
             if choices.len() == 0 {
                 match no_staged() {
                     Ok(_) => true,
@@ -157,6 +158,7 @@ pub fn git_commit_cli() -> Result<(), String> {
         // Get advanced description
         cli::git_commit(None)?;
     }
+    println!("{}", "Changes committed!".bright_green());
     Ok(())
 }
 
