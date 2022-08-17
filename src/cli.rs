@@ -17,17 +17,16 @@ pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
     }
 }
 
-pub fn filter_choice_cli(choices: String) -> Result<Commands, String> {
-    let items = choices.split_terminator("\n").collect::<Vec<_>>();
+pub fn filter_choice_cli(choices: Vec<String>) -> Result<Commands, String> {
     let selection = FuzzySelect::with_theme(&theme::ColorfulTheme::default())
-        .items(&items)
+        .items(&choices)
         .with_prompt("Please choose a menu:")
         .default(1)
         .interact_on_opt(&console::Term::stderr())
         .expect("Couldn't fuzzy search");
 
     match selection {
-        Some(index) => Commands::from_string(items[index].to_string()),
+        Some(index) => Commands::from_string(choices[index].to_string()),
         None => Err("No item was selected!".green().to_string()),
     }
 }

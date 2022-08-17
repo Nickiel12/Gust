@@ -37,11 +37,10 @@ impl Commands {
         }
     }
 
-    pub fn get_gum_string() -> String {
-        let mut output = String::new();
+    pub fn get_commands_vec() -> Vec<String> {
+        let mut output = Vec::<String>::new();
         for item in Commands::iter() {
-            output += "\n";
-            output += item.to_string().as_str();
+            output.push(item.to_string())
         }
         return output;
     }

@@ -33,7 +33,7 @@ fn main() {
             }
         }
         None => {
-            command = match cli::filter_choice_cli(Commands::get_gum_string()) {
+            command = match cli::filter_choice_cli(Commands::get_commands_vec()) {
                 Ok(com) => com,
                 Err(val) => {
                     println!("{}", val);
