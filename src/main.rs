@@ -16,8 +16,9 @@ struct CliArguments {
 
 fn main() {
     println!(
-        "{}",
-        "have you added support for merge conflicts yet?".bright_red()
+        "{}{}",
+        "have you added support for merge conflicts yet?\n".bright_red(),
+        "missing git functionality: `diff,` branches, conflict resolution, stashes,".bright_yellow(),
     );
     let args = CliArguments::parse();
 
