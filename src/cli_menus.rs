@@ -169,11 +169,3 @@ pub fn git_push_cli() -> Result<(), String> {
     cli::git_push()?;
     Ok(())
 }
-
-pub fn settings() -> Result<(), String> {
-    
-    println!("{}", "No settings implemented yet".bright_cyan());
-    println!("Will eventually be used to handle everything from colors, to git ignore, etc");
-
-    Ok(())
-}

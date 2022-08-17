@@ -5,6 +5,7 @@ mod utils;
 
 mod cli;
 mod cli_menus;
+mod settings;
 
 use clap::Parser;
 use colored::Colorize;
@@ -49,6 +50,6 @@ fn main() {
         Commands::Commit => cli_menus::git_commit_cli().unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
-        Commands::Settings => cli_menus::settings().unwrap(),
+        Commands::Settings => settings::cli().unwrap(),
     };
 }
