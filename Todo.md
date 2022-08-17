@@ -1,6 +1,7 @@
 Todo:
 * A "view differences" function that uses `git diff` to show changes, active or staged. `git diff --staged` identical to `git diff --cached`
 * `git add` needs an "all" option
+* convert all cli to accent vec!<string> instead of just string
 * Types of settings
     * `git add` needs an option to hide the "all" option
     * does `git commit` get passed `-v` to show the `git diff` in the message editor? 
