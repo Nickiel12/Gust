@@ -5,6 +5,7 @@ mod utils;
 
 mod cli;
 mod cli_menus;
+mod settings;
 
 use clap::Parser;
 use colored::Colorize;
@@ -16,8 +17,9 @@ struct CliArguments {
 
 fn main() {
     println!(
-        "{}",
-        "have you added support for merge conflicts yet?".bright_red()
+        "{}{}",
+        "have you added support for merge conflicts yet?\n".bright_red(),
+        "missing git functionality: `diff,` branches, conflict resolution, stashes,".bright_yellow(),
     );
     let args = CliArguments::parse();
 
@@ -32,7 +34,7 @@ fn main() {
             }
         }
         None => {
-            command = match cli::filter_choice_cli(Commands::get_gum_string()) {
+            command = match cli::filter_choice_cli(Commands::get_commands_vec()) {
                 Ok(com) => com,
                 Err(val) => {
                     println!("{}", val);
@@ -48,5 +50,6 @@ fn main() {
         Commands::Commit => cli_menus::git_commit_cli().unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
+        Commands::Settings => settings::cli().unwrap(),
     };
 }

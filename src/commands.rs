@@ -10,6 +10,7 @@ pub enum Commands {
     Commit,
     Push,
     Pull,
+    Settings,
 }
 
 impl Commands {
@@ -20,6 +21,7 @@ impl Commands {
             "commit" => Ok(Commands::Commit),
             "push" => Ok(Commands::Push),
             "pull" => Ok(Commands::Pull),
+            "settings" => Ok(Commands::Settings),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
@@ -31,14 +33,14 @@ impl Commands {
             Commands::Commit => String::from("commit"),
             Commands::Push => String::from("push"),
             Commands::Pull => String::from("pull"),
+            Commands::Settings => String::from("settings"),
         }
     }
 
-    pub fn get_gum_string() -> String {
-        let mut output = String::new();
+    pub fn get_commands_vec() -> Vec<String> {
+        let mut output = Vec::<String>::new();
         for item in Commands::iter() {
-            output += "\n";
-            output += item.to_string().as_str();
+            output.push(item.to_string())
         }
         return output;
     }
