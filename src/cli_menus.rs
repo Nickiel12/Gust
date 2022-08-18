@@ -1,8 +1,10 @@
 use crate::cli;
+use crate::settings::Config;
+use crate::utils;
 
 use colored::Colorize;
 
-pub fn git_add_cli() -> Result<(), String> {
+pub fn git_add_cli(config: &Config) -> Result<(), String> {
     let status_output: String;
     match cli::git_status_short()? {
         None => {
@@ -59,17 +61,32 @@ pub fn git_add_cli() -> Result<(), String> {
         }
     }
 
-    let usr_selected = cli::choice_no_limit(choices, true)?;
+    if choices.len() == 0 {
+        println!("{}", "Nothing staged, returning to menu".bright_yellow());
+        return Ok(());
+    }
+
+    let usr_selected = cli::choice_no_limit(choices.clone(), true, config.show_all_in_add_menu)?;
     return match usr_selected {
         None => {
             println!("None selected, returning");
             Ok(())
         }
-        Some(choice) => cli::git_add(choice),
+        Some(mut choice) => {
+            if choice[0].eq("All") {
+                choice = vec![];
+                let mut count = 0;
+                for i in choices {
+                    choice.insert(count, utils::strip_colors(i));
+                    count += 1;
+                }
+            }
+            cli::git_add(choice)
+        }
     };
 }
 
-pub fn git_reset_cli() -> Result<(), String> {
+pub fn git_reset_cli(config: &Config) -> Result<(), String> {
     println!(
         "{} {} {}",
         "Opening".green(),
@@ -91,7 +108,7 @@ pub fn git_reset_cli() -> Result<(), String> {
                     _ => {}
                 }
             }
-            return match cli::choice_no_limit(choices, true)? {
+            return match cli::choice_no_limit(choices, true, false)? {
                 None => {
                     println!("None selected, returning");
                     Ok(())
@@ -102,7 +119,7 @@ pub fn git_reset_cli() -> Result<(), String> {
     };
 }
 
-pub fn git_commit_cli() -> Result<(), String> {
+pub fn git_commit_cli(config: &Config) -> Result<(), String> {
     println!(
         "{} {} {}",
         "Opening".green(),
@@ -110,14 +127,6 @@ pub fn git_commit_cli() -> Result<(), String> {
         "menu".green()
     );
     let status_opt = cli::git_status_short()?;
-
-    fn no_staged() -> Result<(), String> {
-        if cli::ask_choice_cli("No files staged, would you like to add some?".to_string())? {
-            git_add_cli()
-        } else {
-            return Err("Git commit function failed at 'no_staged ask_choice_cli'".to_string());
-        }
-    }
 
     let do_commit = match status_opt {
         None => {
@@ -135,9 +144,12 @@ pub fn git_commit_cli() -> Result<(), String> {
             }
             // check for staged changes
             if choices.len() == 0 {
-                match no_staged() {
-                    Ok(_) => true,
-                    Err(_err) => false,
+                if cli::ask_choice_cli("No files staged, would you like to add some?".to_string())?
+                {
+                    git_add_cli(&config)?;
+                    true
+                } else {
+                    false
                 }
             } else {
                 if cli::ask_choice_cli(format!(

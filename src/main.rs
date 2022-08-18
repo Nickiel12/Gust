@@ -19,9 +19,16 @@ fn main() {
     println!(
         "{}{}",
         "have you added support for merge conflicts yet?\n".bright_red(),
-        "missing git functionality: `diff,` branches, conflict resolution, stashes,".bright_yellow(),
+        "missing git functionality: `diff,` branches, conflict resolution, stashes,"
+            .bright_yellow(),
     );
     let args = CliArguments::parse();
+
+    let mut config = settings::load_config().unwrap();
+
+    if config.show_welcome {
+        println!("hellow!");
+    }
 
     let command;
     match args.command.clone() {
@@ -45,11 +52,13 @@ fn main() {
     }
 
     let result = match command {
-        Commands::Add => cli_menus::git_add_cli().unwrap(),
-        Commands::Reset => cli_menus::git_reset_cli().unwrap(),
-        Commands::Commit => cli_menus::git_commit_cli().unwrap(),
+        Commands::Add => cli_menus::git_add_cli(&config).unwrap(),
+        Commands::Reset => cli_menus::git_reset_cli(&config).unwrap(),
+        Commands::Commit => cli_menus::git_commit_cli(&config).unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
         Commands::Settings => settings::cli().unwrap(),
     };
+
+    settings::save_config(config).unwrap();
 }

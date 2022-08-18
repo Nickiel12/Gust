@@ -34,7 +34,11 @@ pub fn filter_choice_cli(choices: Vec<String>) -> Result<Commands, String> {
 pub fn choice_no_limit(
     mut choices: Vec<String>,
     has_none: bool,
+    has_all: bool,
 ) -> Result<Option<Vec<String>>, String> {
+    if has_all {
+        choices.insert(0, "All".to_string());
+    }
     if has_none {
         choices.push("None".to_string());
     }
@@ -55,6 +59,8 @@ pub fn choice_no_limit(
             }
             if all_choices.contains(&choices[choices.len() - 1].to_string()) {
                 Ok(None)
+            } else if all_choices.contains(&choices[0].to_string()) {
+                Ok(Some(vec!["All".to_string()]))
             } else {
                 Ok(Some(all_choices))
             }
