@@ -1,4 +1,5 @@
 use crate::commands::Commands;
+use crate::settings::Config;
 use crate::utils;
 
 use colored::Colorize;
@@ -74,6 +75,28 @@ pub fn choice_no_limit(
     }
 }
 
+pub fn git_status_short() -> Result<Option<String>, String> {
+    let git_status_cmd = Command::new("git")
+        .arg("status")
+        .arg("--short")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git add!");
+
+    let git_status = git_status_cmd.wait_with_output().unwrap();
+
+    if git_status.status.success() {
+        let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
+        if status_output == " " || status_output.len() == 0 {
+            Ok(None)
+        } else {
+            Ok(Some(status_output))
+        }
+    } else {
+        Err(String::from_utf8_lossy(&git_status.stderr).to_string())
+    }
+}
+
 pub fn git_pull() -> Result<(), String> {
     let git_pull_cmd = Command::new("git")
         .arg("pull")
@@ -137,44 +160,26 @@ pub fn git_reset(input: Vec<String>) -> Result<(), String> {
     }
 }
 
-pub fn git_status_short() -> Result<Option<String>, String> {
-    let git_status_cmd = Command::new("git")
-        .arg("status")
-        .arg("--short")
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("Couldn't call git add!");
-
-    let git_status = git_status_cmd.wait_with_output().unwrap();
-
-    if git_status.status.success() {
-        let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
-        if status_output == " " || status_output.len() == 0 {
-            Ok(None)
-        } else {
-            Ok(Some(status_output))
-        }
-    } else {
-        Err(String::from_utf8_lossy(&git_status.stderr).to_string())
-    }
-}
-
-pub fn git_commit(passed_options: Option<Vec<String>>) -> Result<(), String> {
+pub fn git_commit(passed_options: Option<Vec<String>>, config: &Config) -> Result<(), String> {
     let git_commit_cmd;
+    let mut options: Vec<String> = vec![];
+
     if passed_options.is_some() {
-        let options = passed_options.unwrap();
-        let opts = options.join(" ");
-        git_commit_cmd = Command::new("git")
-            .arg("commit")
-            .args(options)
-            .spawn()
-            .expect(format!("Couldn't call `git commit {}`!", opts).as_str());
-    } else {
-        git_commit_cmd = Command::new("git")
-            .arg("commit")
-            .spawn()
-            .expect("Couldn't call `git commit`!");
+        options = passed_options.unwrap();
     }
+
+    if config.verbose_commit {
+        options.push("-v".to_string());
+    }
+
+    // for debugging
+    let opts = options.join(" ");
+
+    git_commit_cmd = Command::new("git")
+        .arg("commit")
+        .args(options)
+        .spawn()
+        .expect(format!("Couldn't call `git commit {}`!", opts).as_str());
 
     let output = git_commit_cmd.wait_with_output().unwrap();
 

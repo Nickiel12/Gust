@@ -9,6 +9,8 @@ const APP_NAME: &str = "gust";
 pub struct Config {
     pub show_welcome: bool,
     pub show_all_in_add_menu: bool,
+
+    pub verbose_commit: bool,
 }
 
 impl std::default::Default for Config {
@@ -16,6 +18,8 @@ impl std::default::Default for Config {
         Self {
             show_welcome: false,
             show_all_in_add_menu: true,
+
+            verbose_commit: false,
         }
     }
 }

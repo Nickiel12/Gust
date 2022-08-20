@@ -72,7 +72,7 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
             println!("None selected, returning");
             Ok(())
         }
-        cli::UserResponse::Some(mut choice) => cli::git_add(choice),
+        cli::UserResponse::Some(choice) => cli::git_add(choice),
         cli::UserResponse::All => cli::git_add(utils::strip_vec_colors(choices)),
     };
 }
@@ -160,7 +160,7 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
         // Get commit type
         // Get commit message
         // Get advanced description
-        cli::git_commit(None)?;
+        cli::git_commit(None, config)?;
     }
     println!("{}", "Changes committed!".bright_green());
     Ok(())
