@@ -68,21 +68,12 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
 
     let usr_selected = cli::choice_no_limit(choices.clone(), true, config.show_all_in_add_menu)?;
     return match usr_selected {
-        None => {
+        cli::UserResponse::None => {
             println!("None selected, returning");
             Ok(())
         }
-        Some(mut choice) => {
-            if choice[0].eq("All") {
-                choice = vec![];
-                let mut count = 0;
-                for i in choices {
-                    choice.insert(count, utils::strip_colors(i));
-                    count += 1;
-                }
-            }
-            cli::git_add(choice)
-        }
+        cli::UserResponse::Some(mut choice) => cli::git_add(choice),
+        cli::UserResponse::All => cli::git_add(utils::strip_vec_colors(choices)),
     };
 }
 
@@ -109,11 +100,12 @@ pub fn git_reset_cli(config: &Config) -> Result<(), String> {
                 }
             }
             return match cli::choice_no_limit(choices, true, false)? {
-                None => {
+                cli::UserResponse::None => {
                     println!("None selected, returning");
                     Ok(())
                 }
-                Some(choice) => return cli::git_reset(choice),
+                cli::UserResponse::Some(choice) => return cli::git_reset(choice),
+                _ => Err("User shouldn't have been able to select 'all' in 'reset'".to_string()),
             };
         }
     };

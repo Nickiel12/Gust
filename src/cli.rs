@@ -6,6 +6,12 @@ use console;
 use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect};
 use std::process::{Command, Stdio};
 
+pub enum UserResponse<T> {
+    All,
+    Some(T),
+    None,
+}
+
 pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
     match Confirm::new()
         .with_prompt(prompt)
@@ -35,7 +41,7 @@ pub fn choice_no_limit(
     mut choices: Vec<String>,
     has_none: bool,
     has_all: bool,
-) -> Result<Option<Vec<String>>, String> {
+) -> Result<UserResponse<Vec<String>>, String> {
     if has_all {
         choices.insert(0, "All".to_string());
     }
@@ -58,11 +64,11 @@ pub fn choice_no_limit(
                 all_choices.push(utils::strip_colors(choices[i].to_string()).to_owned());
             }
             if all_choices.contains(&choices[choices.len() - 1].to_string()) {
-                Ok(None)
+                Ok(UserResponse::None)
             } else if all_choices.contains(&choices[0].to_string()) {
-                Ok(Some(vec!["All".to_string()]))
+                Ok(UserResponse::All)
             } else {
-                Ok(Some(all_choices))
+                Ok(UserResponse::Some(all_choices))
             }
         }
     }
