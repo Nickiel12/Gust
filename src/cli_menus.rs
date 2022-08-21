@@ -171,10 +171,14 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
         let short_form: String = {
             let mut commit_msg = Vec::<String>::new();
             if config.use_types {
-                commit_msg.push(cli::filter_choice_cli(conventions.types).unwrap());
+                commit_msg.push(
+                    cli::filter_choice_cli(conventions.types, true)?.unwrap_or("".to_string()),
+                );
                 if config.use_scope {
                     commit_msg.push(conventions.scope_delimeters.opening.clone());
-                    commit_msg.push(cli::filter_choice_cli(conventions.scopes)?);
+                    commit_msg.push(
+                        cli::filter_choice_cli(conventions.scopes, true)?.unwrap_or("".to_string()),
+                    );
                     commit_msg.push(conventions.scope_delimeters.closing.clone());
                 }
                 if config.use_important {

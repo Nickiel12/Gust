@@ -23,7 +23,13 @@ pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
     }
 }
 
-pub fn filter_choice_cli(choices: Vec<String>) -> Result<String, String> {
+pub fn filter_choice_cli(
+    mut choices: Vec<String>,
+    allow_none: bool,
+) -> Result<Option<String>, String> {
+    if allow_none {
+        choices.push("None".to_string());
+    }
     let selection = FuzzySelect::with_theme(&theme::ColorfulTheme::default())
         .items(&choices)
         .with_prompt("Please choose a menu:")
@@ -32,7 +38,13 @@ pub fn filter_choice_cli(choices: Vec<String>) -> Result<String, String> {
         .expect("Couldn't fuzzy search");
 
     match selection {
-        Some(index) => Ok(choices[index].to_string()),
+        Some(index) => {
+            if index == choices.len() {
+                return Ok(None);
+            } else {
+                return Ok(Some(choices[index].to_string()));
+            }
+        }
         None => Err("No item was selected!".green().to_string()),
     }
 }
