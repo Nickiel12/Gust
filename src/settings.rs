@@ -67,10 +67,16 @@ pub fn save_config(config: Config) -> Result<(), confy::ConfyError> {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ScopeDelims {
+    pub opening: String,
+    pub closing: String,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct ConventionSettings {
     pub types: Vec<String>,
     pub scopes: Vec<String>,
-    pub scope_delimeters: Vec<String>,
+    pub scope_delimeters: ScopeDelims,
     pub important_symbol: String,
     pub separator: String,
     pub footers: Vec<String>,

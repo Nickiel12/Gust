@@ -173,9 +173,9 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
             if config.use_types {
                 commit_msg.push(cli::filter_choice_cli(conventions.types).unwrap());
                 if config.use_scope {
-                    commit_msg.push(conventions.scope_delimeters.get(0).unwrap().clone());
+                    commit_msg.push(conventions.scope_delimeters.opening.clone());
                     commit_msg.push(cli::filter_choice_cli(conventions.scopes)?);
-                    commit_msg.push(conventions.scope_delimeters.get(1).unwrap().clone());
+                    commit_msg.push(conventions.scope_delimeters.closing.clone());
                 }
                 if config.use_important {
                     if cli::ask_choice_cli(format!(
