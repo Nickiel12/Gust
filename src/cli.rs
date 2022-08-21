@@ -1,4 +1,3 @@
-use crate::commands::Commands;
 use crate::settings::Config;
 use crate::utils;
 
@@ -24,7 +23,7 @@ pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
     }
 }
 
-pub fn filter_choice_cli(choices: Vec<String>) -> Result<Commands, String> {
+pub fn filter_choice_cli(choices: Vec<String>) -> Result<String, String> {
     let selection = FuzzySelect::with_theme(&theme::ColorfulTheme::default())
         .items(&choices)
         .with_prompt("Please choose a menu:")
@@ -33,7 +32,7 @@ pub fn filter_choice_cli(choices: Vec<String>) -> Result<Commands, String> {
         .expect("Couldn't fuzzy search");
 
     match selection {
-        Some(index) => Commands::from_string(choices[index].to_string()),
+        Some(index) => Ok(choices[index].to_string()),
         None => Err("No item was selected!".green().to_string()),
     }
 }

@@ -1,0 +1,26 @@
+{
+    "types": [
+        "fix",
+        "feat",
+        "build",
+        "chore",
+        "docs",
+        "style",
+        "refactor",
+        "test"
+    ],
+    "scopes": [
+        "ui",
+        "internal"
+    ],
+    "scope_delimeters": {
+        "opening": "(",
+        "closing": ")"
+    },
+    "important_symbol": "!",   
+    "separator": ":",
+    "footers": [
+        "BREAKING CHANGES"
+    ]
+
+}

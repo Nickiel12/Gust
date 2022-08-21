@@ -42,7 +42,7 @@ fn main() {
         }
         None => {
             command = match cli::filter_choice_cli(Commands::get_commands_vec()) {
-                Ok(com) => com,
+                Ok(com) => Commands::from_string(com).unwrap(),
                 Err(val) => {
                     println!("{}", val);
                     std::process::exit(1);

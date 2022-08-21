@@ -3,6 +3,8 @@ use crate::settings::Config;
 use crate::utils;
 
 use colored::Colorize;
+use console;
+use dialoguer::{theme::ColorfulTheme, Editor, Input};
 
 pub fn git_add_cli(config: &Config) -> Result<(), String> {
     let status_output: String;
@@ -156,11 +158,61 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
             }
         }
     };
-    if do_commit {
-        // Get commit type
-        // Get commit message
-        // Get advanced description
-        cli::git_commit(None, config)?;
+
+    if config.use_git_commit_message_dialog {
+        if do_commit {
+            // Get commit type
+            // Get commit message
+            // Get advanced description
+            cli::git_commit(None, config)?;
+        }
+    } else {
+        let conventions = crate::settings::load_convention(config.convention.clone());
+        let short_form: String = {
+            let mut commit_msg = Vec::<String>::new();
+            if config.use_types {
+                commit_msg.push(cli::filter_choice_cli(conventions.types).unwrap());
+                if config.use_scope {
+                    commit_msg.push(conventions.scope_delimeters.get(0).unwrap().clone());
+                    commit_msg.push(cli::filter_choice_cli(conventions.scopes)?);
+                    commit_msg.push(conventions.scope_delimeters.get(1).unwrap().clone());
+                }
+                if config.use_important {
+                    if cli::ask_choice_cli(format!(
+                        "Flag this commit as important with: '{}'",
+                        conventions.important_symbol
+                    ))? {
+                        commit_msg.push(conventions.important_symbol);
+                    }
+                }
+                commit_msg.push(conventions.separator);
+                commit_msg.push(" ".to_string());
+            }
+
+            let usr_selection: String = Input::with_theme(&ColorfulTheme::default())
+                .allow_empty(false)
+                .with_initial_text(commit_msg.join(""))
+                .with_prompt("Enter Commit Message, Shouldn't exceed this     \\/")
+                .interact_text_on(&console::Term::stderr())
+                .unwrap();
+
+            usr_selection
+        };
+
+        let description: String = Editor::new()
+            .edit("Enter a commit description")
+            .unwrap()
+            .unwrap();
+
+        cli::git_commit(
+            Some(vec![
+                "-m".to_string(),
+                short_form,
+                "-m".to_string(),
+                description,
+            ]),
+            config,
+        )?;
     }
     println!("{}", "Changes committed!".bright_green());
     Ok(())
