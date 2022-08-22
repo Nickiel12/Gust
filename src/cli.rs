@@ -51,6 +51,7 @@ pub fn filter_choice_cli(
 
 pub fn choice_no_limit(
     mut choices: Vec<String>,
+    prompt: String,
     has_none: bool,
     has_all: bool,
 ) -> Result<UserResponse<Vec<String>>, String> {
@@ -63,7 +64,7 @@ pub fn choice_no_limit(
 
     let selected: Option<Vec<usize>> = MultiSelect::new()
         .items(&choices)
-        .with_prompt("Please choose files to stage:")
+        .with_prompt(prompt)
         .interact_on_opt(&console::Term::stderr())
         .expect("Couldn't make a choice");
 

@@ -7,6 +7,8 @@ use console;
 use dialoguer::{theme::ColorfulTheme, Editor, Input};
 
 pub fn git_add_cli(config: &Config) -> Result<(), String> {
+    let choice_add_prompt: String = String::from("Select files to add:");
+
     let status_output: String;
     match cli::git_status_short()? {
         None => {
@@ -68,7 +70,12 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
         return Ok(());
     }
 
-    let usr_selected = cli::choice_no_limit(choices.clone(), true, config.show_all_in_add_menu)?;
+    let usr_selected = cli::choice_no_limit(
+        choices.clone(),
+        choice_add_prompt,
+        true,
+        config.show_all_in_add_menu,
+    )?;
     return match usr_selected {
         cli::UserResponse::None => {
             println!("None selected, returning");
@@ -80,6 +87,8 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
 }
 
 pub fn git_reset_cli(config: &Config) -> Result<(), String> {
+    let choice_reset_prompt: String = String::from("Select files to reset:");
+
     println!(
         "{} {} {}",
         "Opening".green(),
@@ -101,7 +110,7 @@ pub fn git_reset_cli(config: &Config) -> Result<(), String> {
                     _ => {}
                 }
             }
-            return match cli::choice_no_limit(choices, true, false)? {
+            return match cli::choice_no_limit(choices, choice_reset_prompt, true, false)? {
                 cli::UserResponse::None => {
                     println!("None selected, returning");
                     Ok(())
@@ -236,6 +245,7 @@ pub fn git_push_cli() -> Result<(), String> {
 }
 
 pub fn git_checkout_cli() -> Result<(), String> {
+    let choice_checkout_prompt: String = String::from("Select files to checkout:");
     let status_opt = cli::git_status_short()?;
 
     match status_opt {
@@ -263,7 +273,12 @@ pub fn git_checkout_cli() -> Result<(), String> {
                         for line in status_output.lines() {
                             choices.push(line[3..].yellow().to_string());
                         }
-                        let choices = match cli::choice_no_limit(choices.clone(), true, true)? {
+                        let choices = match cli::choice_no_limit(
+                            choices.clone(),
+                            choice_checkout_prompt,
+                            true,
+                            true,
+                        )? {
                             cli::UserResponse::All => utils::strip_vec_colors(choices),
                             cli::UserResponse::Some(selected) => utils::strip_vec_colors(selected),
                             cli::UserResponse::None => Vec::<String>::new(),
@@ -277,7 +292,12 @@ pub fn git_checkout_cli() -> Result<(), String> {
                 return Ok(());
             } else {
                 // If there are unstaged chnages, ask the user to choose from them
-                let choices = match cli::choice_no_limit(choices.clone(), true, true)? {
+                let choices = match cli::choice_no_limit(
+                    choices.clone(),
+                    choice_checkout_prompt,
+                    true,
+                    true,
+                )? {
                     cli::UserResponse::All => Some(utils::strip_vec_colors(choices)),
                     cli::UserResponse::Some(selected) => Some(utils::strip_vec_colors(selected)),
                     cli::UserResponse::None => None,
