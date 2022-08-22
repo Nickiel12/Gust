@@ -26,9 +26,7 @@ fn main() {
 
     let mut config = settings::load_config().unwrap();
 
-    if config.show_welcome {
-        println!("hellow!");
-    }
+    settings::check_for_convention_file(&config);
 
     let command;
     match args.command.clone() {
