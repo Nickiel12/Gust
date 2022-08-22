@@ -98,6 +98,7 @@ pub fn git_status_short() -> Result<Option<String>, String> {
 
     if git_status.status.success() {
         let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
+        println!(":{}:", status_output.len());
         if status_output.len() == 1 || status_output.len() == 0 {
             Ok(None)
         } else {
