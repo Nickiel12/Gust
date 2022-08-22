@@ -94,7 +94,9 @@ pub fn git_status_short() -> Result<Option<String>, String> {
         .spawn()
         .expect("Couldn't call git add!");
 
-    let git_status = git_status_cmd.wait_with_output().unwrap();
+    let git_status = git_status_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if git_status.status.success() {
         let status_output = String::from_utf8_lossy(&git_status.stdout).to_string();
@@ -114,7 +116,7 @@ pub fn git_pull() -> Result<(), String> {
         .spawn()
         .expect("Couldn't run `git pull`");
 
-    let output = git_pull_cmd.wait_with_output().unwrap();
+    let output = git_pull_cmd.wait_with_output().map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
@@ -129,7 +131,25 @@ pub fn git_push() -> Result<(), String> {
         .spawn()
         .expect("Couldn't run `git push`");
 
-    let output = git_push_cmd.wait_with_output().unwrap();
+    let output = git_push_cmd.wait_with_output().map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
+    }
+}
+
+pub fn git_checkout(files: Vec<String>) -> Result<(), String> {
+    let git_checkout_cmd = Command::new("git")
+        .arg("checkout")
+        .args(files)
+        .spawn()
+        .expect("Couldn't run `git checkout`");
+
+    let output = git_checkout_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
@@ -145,7 +165,7 @@ pub fn git_add(input: Vec<String>) -> Result<(), String> {
         .spawn()
         .expect("Couldn't run `git add`");
 
-    let output = git_add_cmd.wait_with_output().unwrap();
+    let output = git_add_cmd.wait_with_output().map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
@@ -162,7 +182,9 @@ pub fn git_reset(input: Vec<String>) -> Result<(), String> {
         .spawn()
         .expect("Couldn't run `git reset`");
 
-    let output = git_reset_cmd.wait_with_output().unwrap();
+    let output = git_reset_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
@@ -192,7 +214,9 @@ pub fn git_commit(passed_options: Option<Vec<String>>, config: &Config) -> Resul
         .spawn()
         .expect(format!("Couldn't call `git commit {}`!", opts).as_str());
 
-    let output = git_commit_cmd.wait_with_output().unwrap();
+    let output = git_commit_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());

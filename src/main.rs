@@ -53,9 +53,10 @@ fn main() {
         Commands::Add => cli_menus::git_add_cli(&config).unwrap(),
         Commands::Reset => cli_menus::git_reset_cli(&config).unwrap(),
         Commands::Commit => cli_menus::git_commit_cli(&config).unwrap(),
+        Commands::Settings => settings::cli().unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
-        Commands::Settings => settings::cli().unwrap(),
+        Commands::Checkout => cli_menus::git_checkout_cli().unwrap(),
     };
 
     settings::save_config(config).unwrap();

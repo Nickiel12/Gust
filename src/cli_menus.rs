@@ -234,3 +234,59 @@ pub fn git_push_cli() -> Result<(), String> {
     cli::git_push()?;
     Ok(())
 }
+
+pub fn git_checkout_cli() -> Result<(), String> {
+    let status_opt = cli::git_status_short()?;
+
+    match status_opt {
+        None => {
+            println!("{}", "All files are current with HEAD".bright_green());
+            Ok(())
+        }
+        Some(status_output) => {
+            let mut choices = Vec::<String>::new();
+            // for every line that is unstaged changes,
+            // add to choices
+            for line in status_output.lines() {
+                match line.chars().nth(1).unwrap() {
+                    ' ' => continue,
+                    _ => choices.push(line[3..].yellow().to_string()),
+                }
+            }
+            // if there is an output to 'git status', but no unstaged changes,
+            // ask user if they want to checkout any staged files
+            if choices.len() == 0 {
+                if status_output.len() != 0 {
+                    if cli::ask_choice_cli(
+                        "All changes are staged, would you still like to checkout?".to_string(),
+                    )? {
+                        for line in status_output.lines() {
+                            choices.push(line[3..].yellow().to_string());
+                        }
+                        let choices = match cli::choice_no_limit(choices.clone(), true, true)? {
+                            cli::UserResponse::All => utils::strip_vec_colors(choices),
+                            cli::UserResponse::Some(selected) => utils::strip_vec_colors(selected),
+                            cli::UserResponse::None => Vec::<String>::new(),
+                        };
+                        if choices.len() != 0 {
+                            cli::git_reset(choices.clone())?;
+                            cli::git_checkout(choices)?;
+                        }
+                    }
+                }
+                return Ok(());
+            } else {
+                // If there are unstaged chnages, ask the user to choose from them
+                let choices = match cli::choice_no_limit(choices.clone(), true, true)? {
+                    cli::UserResponse::All => Some(utils::strip_vec_colors(choices)),
+                    cli::UserResponse::Some(selected) => Some(utils::strip_vec_colors(selected)),
+                    cli::UserResponse::None => None,
+                };
+                if choices.is_some() {
+                    cli::git_checkout(choices.unwrap())?;
+                }
+                Ok(())
+            }
+        }
+    }
+}
