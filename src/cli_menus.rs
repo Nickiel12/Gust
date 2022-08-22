@@ -196,7 +196,7 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
             let usr_selection: String = Input::with_theme(&ColorfulTheme::default())
                 .allow_empty(false)
                 .with_initial_text(commit_msg.join(""))
-                .with_prompt("Enter Commit Message, Shouldn't exceed this     \\/")
+                .with_prompt(" Enter Commit Message, Shouldn't exceed this     \\/\n")
                 .interact_text_on(&console::Term::stderr())
                 .unwrap();
 
