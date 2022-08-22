@@ -26,7 +26,7 @@ fn main() {
 
     let mut config = settings::load_config().unwrap();
 
-    settings::check_for_convention_file(&config);
+    settings::check_for_convention_file(&config).unwrap();
 
     let command;
     match args.command.clone() {
