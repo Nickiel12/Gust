@@ -3,9 +3,10 @@ use crate::utils;
 
 use colored::Colorize;
 use console;
-use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect};
+use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect, Select};
 use std::process::{Command, Stdio};
 
+#[derive(Debug)]
 pub enum UserResponse<T> {
     All,
     Some(T),
@@ -48,6 +49,44 @@ pub fn filter_choice_cli(
         None => Err("No item was selected!".green().to_string()),
     }
 }
+
+pub fn choice_single (
+    mut choices: Vec<String>,
+    prompt: String,
+    has_all: bool,
+    has_none: bool,
+) -> Result<UserResponse<String>, String> {
+    if has_all {
+        choices.insert(0, "All".to_string());
+    }
+    if has_none {
+        choices.push("None".to_string());
+    }
+
+    let selected = Select::new()
+        .items(&choices)
+        .with_prompt(prompt)
+        .interact_on_opt(&console::Term::stderr())
+        .expect("Couldn't start `select`");
+
+    match selected {
+        None => Err("No items were selected".to_string()),
+        Some(index) => {
+            if has_all {
+                if index == 0 {
+                    return Ok(UserResponse::All);
+                }
+            }
+            if has_none{
+                if index == choices.len()-1 {
+                    return Ok(UserResponse::None);
+                }
+            }
+            return Ok(UserResponse::Some(utils::strip_colors(choices[index].to_string().to_owned())));
+        }
+    }
+}
+
 
 pub fn choice_no_limit(
     mut choices: Vec<String>,
