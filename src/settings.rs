@@ -81,13 +81,6 @@ pub struct ConventionSettings {
     pub footers: Vec<String>,
 }
 
-pub fn cli() -> Result<(), String> {
-    println!("{}", "No settings implemented yet".bright_cyan());
-    println!("Will eventually be used to handle everything from colors, to git ignore, etc");
-
-    Ok(())
-}
-
 pub fn load_convention(convention_name: String) -> ConventionSettings {
     let json: ConventionSettings = serde_json::from_reader(
         std::fs::File::open(get_config((convention_name + ".json").as_str())).unwrap(),
