@@ -1,9 +1,5 @@
-use std::fmt::format;
-
 use colored::Colorize;
 use confy;
-use console::Term;
-use dialoguer::Select;
 use dirs_next;
 use serde::{Deserialize, Serialize};
 use serde_json;
