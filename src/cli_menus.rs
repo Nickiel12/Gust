@@ -1,4 +1,4 @@
-use crate::cli;
+use crate::cli::{self, UserResponse};
 use crate::settings::Config;
 use crate::utils;
 
@@ -231,6 +231,30 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
         }
     }
     println!("{}", "Changes committed!".bright_green());
+    Ok(())
+}
+
+pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
+    let stdout = console::Term::stdout();
+    stdout.clear_last_lines(2).map_err(|e| e.to_string())?;
+
+    let choices = vec!["Switch HEAD".to_string(), "Create new branch".to_string()];
+
+    let choice = cli::choice_single(choices, String::from("Select action"), false, false)?;
+    stdout.clear_last_lines(1).map_err(|e| e.to_string())?;
+
+    match choice {
+        UserResponse::Some(val) => match val {
+            0 => {}
+            1 => {
+                let name = cli::get_input("Enter new branch name: ".to_string())?;
+                cli::git_create_branch(name)?;
+            }
+            _ => return Err("Wow, I don't even know what to say...\n Goodbye".to_string()),
+        },
+        _ => return Err("You achieved the impossible".to_string()),
+    }
+
     Ok(())
 }
 

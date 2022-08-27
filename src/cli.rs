@@ -3,14 +3,20 @@ use crate::utils;
 
 use colored::Colorize;
 use console;
-use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect, Select};
-use std::process::{Command, Stdio};
+use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect, Select, Input};
+use std::{process::{Command, Stdio}, any::type_name};
 
 #[derive(Debug)]
 pub enum UserResponse<T> {
     All,
     Some(T),
     None,
+}
+
+pub fn get_input(prompt: String) -> Result<String, String> {
+    Input::<String>::new()
+        .with_prompt(prompt)
+        .interact_text_on(&console::Term::stderr()).map_err(|e| e.to_string())
 }
 
 pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
@@ -55,7 +61,7 @@ pub fn choice_single (
     prompt: String,
     has_all: bool,
     has_none: bool,
-) -> Result<UserResponse<String>, String> {
+) -> Result<UserResponse<usize>, String> {
     if has_all {
         choices.insert(0, "All".to_string());
     }
@@ -82,7 +88,7 @@ pub fn choice_single (
                     return Ok(UserResponse::None);
                 }
             }
-            return Ok(UserResponse::Some(utils::strip_colors(choices[index].to_string().to_owned())));
+            return Ok(UserResponse::Some(index));
         }
     }
 }
@@ -147,6 +153,22 @@ pub fn git_status_short() -> Result<Option<String>, String> {
         }
     } else {
         Err(String::from_utf8_lossy(&git_status.stderr).to_string())
+    }
+}
+
+pub fn git_create_branch(new_branch: String) -> Result<(), String> {
+    let git_create_branch_cmd = Command::new("git")
+        .arg("branch")
+        .arg(new_branch)
+        .spawn()
+        .expect("Coun't create new branch");
+
+    let output = git_create_branch_cmd.wait_with_output().map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
     }
 }
 
