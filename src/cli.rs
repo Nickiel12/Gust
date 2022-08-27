@@ -3,8 +3,11 @@ use crate::utils;
 
 use colored::Colorize;
 use console;
-use dialoguer::{theme, Confirm, FuzzySelect, MultiSelect, Select, Input};
-use std::{process::{Command, Stdio}, any::type_name};
+use dialoguer::{theme, Confirm, FuzzySelect, Input, MultiSelect, Select};
+use std::{
+    any::type_name,
+    process::{Command, Stdio},
+};
 
 #[derive(Debug)]
 pub enum UserResponse<T> {
@@ -16,7 +19,8 @@ pub enum UserResponse<T> {
 pub fn get_input(prompt: String) -> Result<String, String> {
     Input::<String>::new()
         .with_prompt(prompt)
-        .interact_text_on(&console::Term::stderr()).map_err(|e| e.to_string())
+        .interact_text_on(&console::Term::stderr())
+        .map_err(|e| e.to_string())
 }
 
 pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
@@ -56,7 +60,7 @@ pub fn filter_choice_cli(
     }
 }
 
-pub fn choice_single (
+pub fn choice_single(
     mut choices: Vec<String>,
     prompt: String,
     has_all: bool,
@@ -83,8 +87,8 @@ pub fn choice_single (
                     return Ok(UserResponse::All);
                 }
             }
-            if has_none{
-                if index == choices.len()-1 {
+            if has_none {
+                if index == choices.len() - 1 {
                     return Ok(UserResponse::None);
                 }
             }
@@ -92,7 +96,6 @@ pub fn choice_single (
         }
     }
 }
-
 
 pub fn choice_no_limit(
     mut choices: Vec<String>,
@@ -156,6 +159,53 @@ pub fn git_status_short() -> Result<Option<String>, String> {
     }
 }
 
+pub fn git_get_branches() -> Result<Option<Vec<String>>, String> {
+    let cmd = Command::new("git")
+        .arg("branch")
+        .arg("-a")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git add!");
+
+    let output = cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        let branches: Vec<String> = String::from_utf8_lossy(&output.stdout)
+            .to_string()
+            .split("\n")
+            .filter_map(|i| {
+                if i.contains("HEAD") {
+                    None
+                } else {
+                    if i.len() > 2 {
+                        Some(i[2..].to_string())
+                    } else {
+                        None
+                    }
+                }
+            })
+            .collect();
+
+        Ok(Some(utils::strip_vec_colors(branches)))
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+pub fn git_fetch() -> Result<(), String> {
+    let cmd = Command::new("git")
+        .arg("fetch")
+        .arg("--all")
+        .spawn()
+        .map_err(|e| e.to_string())?
+        .wait()
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 pub fn git_create_branch(new_branch: String) -> Result<(), String> {
     let git_create_branch_cmd = Command::new("git")
         .arg("branch")
@@ -163,7 +213,9 @@ pub fn git_create_branch(new_branch: String) -> Result<(), String> {
         .spawn()
         .expect("Coun't create new branch");
 
-    let output = git_create_branch_cmd.wait_with_output().map_err(|e| e.to_string())?;
+    let output = git_create_branch_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());

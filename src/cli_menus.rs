@@ -236,7 +236,7 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
 
 pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
     let stdout = console::Term::stdout();
-    stdout.clear_last_lines(2).map_err(|e| e.to_string())?;
+    stdout.clear_last_lines(3).map_err(|e| e.to_string())?;
 
     let choices = vec!["Switch HEAD".to_string(), "Create new branch".to_string()];
 
@@ -245,7 +245,29 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
 
     match choice {
         UserResponse::Some(val) => match val {
-            0 => {}
+            0 => {
+                match cli::git_get_branches()? {
+                    None => println!("{}", "You have no branches here".bright_red()),
+                    Some(mut branches) => {
+                        let target = cli::choice_single(branches.clone(), "Select branch you wish to switch to".bright_yellow().to_string(), false, false)?;
+
+                        match target {
+                            UserResponse::Some(index) => {
+                                let branch = utils::strip_colors(branches[index].clone());
+                                if branch.contains("remotes/") {
+                                    cli::git_fetch()?;
+                                }
+
+                                branches.clear();
+                                branches.push(branch);
+                                cli::git_checkout(branches)?;
+                                return Ok(())
+                            },
+                            _ => return Err("How did you do that one!".to_string())
+                        }
+                   }
+                }
+            }
             1 => {
                 let name = cli::get_input("Enter new branch name: ".to_string())?;
                 cli::git_create_branch(name)?;

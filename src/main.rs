@@ -13,6 +13,7 @@ use colored::Colorize;
 #[derive(Parser)]
 struct CliArguments {
     command: Option<String>,
+    args: Option<String>,
 }
 
 fn main() {
