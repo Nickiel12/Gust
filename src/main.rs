@@ -22,7 +22,7 @@ fn main() {
         "have you added support for merge conflicts yet?\nwindow 'edit' throws error when notepad exited early".bright_red(),
         "missing git functionality: `diff,` branches, conflict resolution, stashes,"
             .bright_yellow(),
-        "Have you set up git reversal? `git log --oneline` git revert ###".bright_red(),
+        "Have you added `git rm` with `--cached` (not disk deletion) and non cached removal?".bright_red(),
     );
     let args = CliArguments::parse();
 
