@@ -234,6 +234,46 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
     Ok(())
 }
 
+pub fn git_undo_commit_cli(config: &Config) -> Result<(), String> {
+    let choice_undo_prompt: String = String::from("Select a commit to revert:");
+
+    let log_output: String;
+    match cli::git_log()? {
+        None => {
+            println!("{}", "No commits found! returning to menu".bright_yellow());
+            return Ok(());
+        }
+        Some(log_string) => log_output = log_string,
+    }
+
+    let mut choices = Vec::<String>::new();
+    for line in log_output.lines() {
+        choices.push(line.to_string());
+    }
+
+    let usr_selected = cli::choice_single(choices.clone(), choice_undo_prompt, false, true)?;
+
+    match usr_selected {
+        cli::UserResponse::None => {
+            println!("'None' selected, returning to menu");
+            return Ok(());
+        }
+        cli::UserResponse::Some(choice) => {
+            println!("{}", choice);
+            let hash = choices[choice][..7].to_string();
+            cli::git_revert(hash.clone())?;
+            println!(
+                "{}",
+                format!("Commit '{}' reverted. Returning to menu", hash)
+                    .bright_green()
+                    .to_string()
+            );
+            return Ok(());
+        }
+        _ => panic!("This is impossible git undo commit"),
+    }
+}
+
 pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
     let stdout = console::Term::stdout();
     stdout.clear_last_lines(3).map_err(|e| e.to_string())?;
@@ -245,29 +285,34 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
 
     match choice {
         UserResponse::Some(val) => match val {
-            0 => {
-                match cli::git_get_branches()? {
-                    None => println!("{}", "You have no branches here".bright_red()),
-                    Some(mut branches) => {
-                        let target = cli::choice_single(branches.clone(), "Select branch you wish to switch to".bright_yellow().to_string(), false, false)?;
+            0 => match cli::git_get_branches()? {
+                None => println!("{}", "You have no branches here".bright_red()),
+                Some(mut branches) => {
+                    let target = cli::choice_single(
+                        branches.clone(),
+                        "Select branch you wish to switch to"
+                            .bright_yellow()
+                            .to_string(),
+                        false,
+                        false,
+                    )?;
 
-                        match target {
-                            UserResponse::Some(index) => {
-                                let branch = utils::strip_colors(branches[index].clone());
-                                if branch.contains("remotes/") {
-                                    cli::git_fetch()?;
-                                }
+                    match target {
+                        UserResponse::Some(index) => {
+                            let branch = utils::strip_colors(branches[index].clone());
+                            if branch.contains("remotes/") {
+                                cli::git_fetch()?;
+                            }
 
-                                branches.clear();
-                                branches.push(branch);
-                                cli::git_checkout(branches)?;
-                                return Ok(())
-                            },
-                            _ => return Err("How did you do that one!".to_string())
+                            branches.clear();
+                            branches.push(branch);
+                            cli::git_checkout(branches)?;
+                            return Ok(());
                         }
-                   }
+                        _ => return Err("How did you do that one!".to_string()),
+                    }
                 }
-            }
+            },
             1 => {
                 let name = cli::get_input("Enter new branch name: ".to_string())?;
                 cli::git_create_branch(name)?;

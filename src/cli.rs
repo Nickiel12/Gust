@@ -4,10 +4,7 @@ use crate::utils;
 use colored::Colorize;
 use console;
 use dialoguer::{theme, Confirm, FuzzySelect, Input, MultiSelect, Select};
-use std::{
-    any::type_name,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 
 #[derive(Debug)]
 pub enum UserResponse<T> {
@@ -167,9 +164,7 @@ pub fn git_get_branches() -> Result<Option<Vec<String>>, String> {
         .spawn()
         .expect("Couldn't call git add!");
 
-    let output = cmd
-        .wait_with_output()
-        .map_err(|e| e.to_string())?;
+    let output = cmd.wait_with_output().map_err(|e| e.to_string())?;
 
     if output.status.success() {
         let branches: Vec<String> = String::from_utf8_lossy(&output.stdout)
@@ -204,6 +199,28 @@ pub fn git_fetch() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+pub fn git_log() -> Result<Option<String>, String> {
+    let git_log_cmd = Command::new("git")
+        .arg("log")
+        .arg("--oneline")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git log --oneline!");
+
+    let git_log = git_log_cmd.wait_with_output().map_err(|e| e.to_string())?;
+
+    if git_log.status.success() {
+        let log_output = String::from_utf8_lossy(&git_log.stdout).to_string();
+        if log_output.len() == 1 || log_output.len() == 0 {
+            Ok(None)
+        } else {
+            Ok(Some(log_output))
+        }
+    } else {
+        Err(String::from_utf8_lossy(&git_log.stderr).to_string())
+    }
 }
 
 pub fn git_create_branch(new_branch: String) -> Result<(), String> {
@@ -336,4 +353,22 @@ pub fn git_commit(passed_options: Option<Vec<String>>, config: &Config) -> Resul
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     }
     Ok(())
+}
+
+pub fn git_revert(commit_hash: String) -> Result<(), String> {
+    let git_revert_cmd = Command::new("git")
+        .arg("revert")
+        .arg(commit_hash)
+        .spawn()
+        .expect("Couldn't run `git reset`");
+
+    let output = git_revert_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        Ok(())
+    }
 }
