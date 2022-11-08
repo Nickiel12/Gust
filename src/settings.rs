@@ -57,14 +57,14 @@ impl std::default::Default for Config {
 
 pub fn load_config() -> Result<Config, confy::ConfyError> {
     println!(
-        "loading config at {}",
-        confy::get_configuration_file_path(APP_NAME)
+        "loading config at {:?}",
+        confy::get_configuration_file_path(APP_NAME, None)
     );
-    return confy::load(APP_NAME);
+    return confy::load(APP_NAME, None);
 }
 
 pub fn save_config(config: Config) -> Result<(), confy::ConfyError> {
-    return confy::store(APP_NAME, config);
+    return confy::store(APP_NAME, None, config);
 }
 
 #[derive(Serialize, Deserialize)]
