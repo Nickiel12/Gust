@@ -2,3 +2,4 @@
 Cargo.lock
 
 *.swp
+~/.vim/autoload/plug.vim
