@@ -1,5 +1,5 @@
 mod commands;
-pub use commands::Commands;
+pub use commands::{BasicCommands, Commands};
 
 mod utils;
 
@@ -41,17 +41,11 @@ fn main() {
             }
         }
         None => {
-            command = match cli::filter_choice_cli(Commands::get_commands_vec(), false) {
-                Ok(com) => Commands::from_string(com.unwrap()).unwrap(),
-                Err(val) => {
-                    println!("{}", val);
-                    std::process::exit(1);
-                }
-            }
+            command = cli_menus::basic_menu().unwrap();
         }
     }
 
-    let result = match command {
+    let _result = match command {
         Commands::Add => cli_menus::git_add_cli(&config).unwrap(),
         Commands::Reset => cli_menus::git_reset_cli(&config).unwrap(),
         Commands::Commit => cli_menus::git_commit_cli(&config).unwrap(),

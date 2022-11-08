@@ -2,9 +2,33 @@ use crate::cli::{self, UserResponse};
 use crate::settings::Config;
 use crate::utils;
 
+use crate::commands::{BasicCommands, Commands};
+
 use colored::Colorize;
 use console;
 use dialoguer::{theme::ColorfulTheme, Editor, Input};
+
+pub fn advanced_menu() -> Result<Commands, String> {
+    let command = match cli::filter_choice_cli(Commands::get_commands_vec(), false) {
+        Ok(com) => Commands::from_string(com.unwrap()),
+        Err(val) => Err(val),
+    };
+
+    return command;
+}
+
+pub fn basic_menu() -> Result<Commands, String> {
+    let choice = cli::filter_choice_cli(BasicCommands::get_commands_vec(), false)?;
+    let command = BasicCommands::from_string(choice.unwrap())?;
+
+    let result = match command {
+        BasicCommands::Add => Ok(Commands::Add),
+        BasicCommands::Reset => Ok(Commands::Reset),
+        BasicCommands::Commit => Ok(Commands::Commit),
+        BasicCommands::AdvancedOptions => advanced_menu(),
+    };
+    return result;
+}
 
 pub fn git_add_cli(config: &Config) -> Result<(), String> {
     let choice_add_prompt: String = String::from("Select files to add:");
@@ -86,7 +110,7 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
     };
 }
 
-pub fn git_reset_cli(config: &Config) -> Result<(), String> {
+pub fn git_reset_cli(_config: &Config) -> Result<(), String> {
     let choice_reset_prompt: String = String::from("Select files to reset:");
 
     println!(
@@ -234,7 +258,7 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
     Ok(())
 }
 
-pub fn git_undo_commit_cli(config: &Config) -> Result<(), String> {
+pub fn git_undo_commit_cli(_config: &Config) -> Result<(), String> {
     let choice_undo_prompt: String = String::from("Select a commit to revert:");
 
     let log_output: String;

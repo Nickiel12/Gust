@@ -4,6 +4,43 @@ use strum_macros::EnumIter;
 use colored::Colorize;
 
 #[derive(EnumIter)]
+pub enum BasicCommands {
+    Add,
+    Reset,
+    Commit,
+    AdvancedOptions,
+}
+
+impl BasicCommands {
+    pub fn from_string(input: String) -> Result<Self, String> {
+        match input.to_lowercase().as_str() {
+            "add" => Ok(BasicCommands::Add),
+            "reset" => Ok(BasicCommands::Reset),
+            "commit" => Ok(BasicCommands::Commit),
+            "advanced options" => Ok(BasicCommands::AdvancedOptions),
+            _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            BasicCommands::Add => String::from("Add"),
+            BasicCommands::Reset => String::from("Reset"),
+            BasicCommands::Commit => String::from("Commit"),
+            BasicCommands::AdvancedOptions => String::from("Advanced Options"),
+        }
+    }
+
+    pub fn get_commands_vec() -> Vec<String> {
+        let mut output = Vec::<String>::new();
+        for item in BasicCommands::iter() {
+            output.push(item.to_string())
+        }
+        return output;
+    }
+}
+
+#[derive(EnumIter)]
 pub enum Commands {
     Add,
     Reset,
