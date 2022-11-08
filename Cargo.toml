@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "3.2.16", features = ["derive"] }
 colored = { version = "2.0.0" }
-confy = "0.4.0"
+confy = "0.5.1"
 console = "0.15.1"
 dialoguer = { version = "0.10.2", features = ["fuzzy-matcher", "fuzzy-select"] }
 dirs-next = "2.0.0"
