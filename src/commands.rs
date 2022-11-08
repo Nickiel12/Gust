@@ -69,14 +69,14 @@ impl Commands {
 
     pub fn to_string(&self) -> String {
         match self {
-            Commands::Add => String::from("add"),
-            Commands::Reset => String::from("reset"),
-            Commands::Commit => String::from("commit"),
-            Commands::UndoCommit => String::from("undo_commit"),
-            Commands::Branches => String::from("branches"),
-            Commands::Push => String::from("push"),
-            Commands::Pull => String::from("pull"),
-            Commands::Checkout => String::from("checkout"),
+            Commands::Add => String::from("Add"),
+            Commands::Reset => String::from("Reset"),
+            Commands::Commit => String::from("Commit"),
+            Commands::UndoCommit => String::from("Undo_commit"),
+            Commands::Branches => String::from("Branches"),
+            Commands::Push => String::from("Push"),
+            Commands::Pull => String::from("Pull"),
+            Commands::Checkout => String::from("Checkout"),
         }
     }
 
