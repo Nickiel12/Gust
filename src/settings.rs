@@ -20,6 +20,7 @@ pub fn get_config(file_name: &str) -> std::path::PathBuf {
 pub struct Config {
     pub show_welcome: bool,
     pub show_all_in_add_menu: bool,
+    pub enable_basic_menu: bool,
 
     pub verbose_commit: bool,
     pub use_git_commit_message_dialog: bool,
@@ -38,6 +39,7 @@ impl std::default::Default for Config {
         Self {
             show_welcome: false,
             show_all_in_add_menu: true,
+            enable_basic_menu: true,
 
             verbose_commit: false,
             use_git_commit_message_dialog: false,
@@ -54,6 +56,10 @@ impl std::default::Default for Config {
 }
 
 pub fn load_config() -> Result<Config, confy::ConfyError> {
+    println!(
+        "loading config at {}",
+        confy::get_configuration_file_path(APP_NAME)
+    );
     return confy::load(APP_NAME);
 }
 

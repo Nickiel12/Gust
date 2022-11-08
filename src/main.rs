@@ -41,7 +41,11 @@ fn main() {
             }
         }
         None => {
-            command = cli_menus::basic_menu().unwrap();
+            if config.enable_basic_menu {
+                command = cli_menus::basic_menu().unwrap();
+            } else {
+                command = cli_menus::advanced_menu().unwrap();
+            }
         }
     }
 
