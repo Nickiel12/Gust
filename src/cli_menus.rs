@@ -425,3 +425,36 @@ pub fn git_checkout_cli() -> Result<(), String> {
         }
     }
 }
+
+pub fn git_remove() -> Result<(), String> {
+    let choice_remove_prompt: String = String::from("Select files to remove from tracking:");
+
+    match cli::git_ls_tree()? {
+        None => println!(
+            "{}",
+            "There were no files found in the git repo".bright_green()
+        ),
+        Some(options) => {
+            let mut choices = Vec::<String>::new();
+            for line in options.lines() {
+                choices.push(line.yellow().to_string());
+            }
+
+            let user_choices =
+                match cli::choice_no_limit(choices.clone(), choice_remove_prompt, true, false)? {
+                    cli::UserResponse::All => utils::strip_vec_colors(choices),
+                    cli::UserResponse::Some(selected) => utils::strip_vec_colors(selected),
+                    cli::UserResponse::None => vec![],
+                };
+
+            let as_cached = cli::ask_yes_no(
+                String::from("Would you like to delete from the disk?"),
+                false,
+            )?;
+
+            cli::git_rm(user_choices, as_cached)?;
+        }
+    }
+
+    Ok(())
+}

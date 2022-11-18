@@ -50,6 +50,7 @@ pub enum Commands {
     Push,
     Pull,
     Checkout,
+    Remove,
 }
 
 impl Commands {
@@ -63,6 +64,7 @@ impl Commands {
             "push" => Ok(Commands::Push),
             "pull" => Ok(Commands::Pull),
             "checkout" => Ok(Commands::Checkout),
+            "remove" => Ok(Commands::Remove),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
@@ -77,6 +79,7 @@ impl Commands {
             Commands::Push => String::from("Push"),
             Commands::Pull => String::from("Pull"),
             Commands::Checkout => String::from("Checkout"),
+            Commands::Remove => String::from("Remove"),
         }
     }
 

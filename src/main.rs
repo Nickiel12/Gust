@@ -19,11 +19,12 @@ struct CliArguments {
 fn main() {
     println!(
         "{}{}{}{}",
-        "have you added support for merge conflicts yet?\nwindow 'edit' throws error when notepad exited early\n".bright_red(),
+        "window 'edit' throws error when notepad exited early\n".bright_red(),
         "missing git functionality: `diff,` branches, conflict resolution, stashes,\n"
             .bright_yellow(),
         "Add menu for adding to gitignore".bright_blue(),
-        "Have you added `git rm` with `--cached` (not disk deletion) and non cached removal?\n".bright_red(),
+        "Have you added `git rm` with `--cached` (not disk deletion) and non cached removal?\n"
+            .bright_red(),
     );
     let args = CliArguments::parse();
 
@@ -59,6 +60,7 @@ fn main() {
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
         Commands::Checkout => cli_menus::git_checkout_cli().unwrap(),
+        Commands::Remove => cli_menus::git_remove().unwrap(),
     };
 
     settings::save_config(config).unwrap();

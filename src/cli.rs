@@ -31,6 +31,20 @@ pub fn ask_choice_cli(prompt: String) -> Result<bool, String> {
     }
 }
 
+pub fn ask_yes_no(prompt: String, default_yes: bool) -> Result<bool, String> {
+    let default = if default_yes { "Y" } else { "N" };
+    let user_input: String = Input::new()
+        .with_prompt(format!("{} (y/n)", prompt).to_string())
+        .default(default.into())
+        .interact_text()
+        .expect("Couldn't ask a yes or no question");
+
+    match user_input.chars().nth(0).unwrap() {
+        'y' | 'Y' => Ok(true),
+        _ => Ok(false),
+    }
+}
+
 pub fn filter_choice_cli(
     mut choices: Vec<String>,
     allow_none: bool,
@@ -369,6 +383,62 @@ pub fn git_revert(commit_hash: String) -> Result<(), String> {
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     } else {
+        Ok(())
+    }
+}
+
+pub fn git_ls_tree() -> Result<Option<String>, String> {
+    let git_ls_tree_cmd = Command::new("git")
+        .arg("ls-tree")
+        .arg("--full-tree")
+        .arg("-r")
+        .arg("--name-only")
+        .arg("HEAD")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't run `git ls-tree`");
+
+    let git_output = git_ls_tree_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
+
+    if git_output.status.success() {
+        let output = String::from_utf8_lossy(&git_output.stdout).to_string();
+        if output.len() <= 1 {
+            Ok(None)
+        } else {
+            Ok(Some(output))
+        }
+    } else {
+        Err(String::from_utf8_lossy(&git_output.stderr).to_string())
+    }
+}
+
+pub fn git_rm(files: Vec<String>, as_cached: bool) -> Result<(), String> {
+    let git_rm_cmd = {
+        if as_cached {
+            Command::new("git")
+                .arg("rm")
+                .arg("--cached")
+                .args(files)
+                .spawn()
+                .expect("Couldn't run `git add`")
+        } else {
+            Command::new("git")
+                .arg("rm")
+                .arg("--cached")
+                .args(files)
+                .spawn()
+                .expect("Couldn't run `git add`")
+        }
+    };
+
+    let output = git_rm_cmd.wait_with_output().map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        println!("{}", "Files no longer tracking!".bright_green());
         Ok(())
     }
 }
