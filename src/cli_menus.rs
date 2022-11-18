@@ -452,7 +452,11 @@ pub fn git_remove() -> Result<(), String> {
                 false,
             )?;
 
-            cli::git_rm(user_choices, as_cached)?;
+            if user_choices.len() == 0 {
+                println!("{}", "Nothing selected".bright_yellow());
+            } else {
+                cli::git_rm(user_choices, as_cached)?;
+            }
         }
     }
 
