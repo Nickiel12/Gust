@@ -105,7 +105,14 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
             println!("None selected, returning");
             Ok(())
         }
-        cli::UserResponse::Some(choice) => cli::git_add(choice),
+        cli::UserResponse::Some(choice) => {
+            if choice.len() == 0 {
+                println!("{}", "None selected".bright_yellow());
+                Ok(())
+            } else {
+                cli::git_add(choice)
+            }
+        }
         cli::UserResponse::All => cli::git_add(utils::strip_vec_colors(choices)),
     };
 }
