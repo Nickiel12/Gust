@@ -18,12 +18,16 @@ struct CliArguments {
 
 fn main() {
     println!(
+        "{}",
+        "Gust - Git, with rust. A simple git helper for the average user.\n".bright_blue()
+    );
+    println!(
         "{}{}{}{}",
         "window 'edit' throws error when notepad exited early\n".bright_red(),
-        "missing git functionality: `diff,` branches, conflict resolution, stashes,\n"
+        "missing git functionality: `diff,` branches, conflict resolution, stashes, creation, setting origin\n"
             .bright_yellow(),
         "Add menu for adding to gitignore".bright_blue(),
-        "Have you added `git rm` with `--cached` (not disk deletion) and non cached removal?\n"
+        "\n"
             .bright_red(),
     );
     let args = CliArguments::parse();
