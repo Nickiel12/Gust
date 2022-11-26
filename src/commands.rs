@@ -49,7 +49,6 @@ pub enum Commands {
     Branches,
     Push,
     Pull,
-    Checkout,
     Remove,
 }
 
@@ -63,7 +62,6 @@ impl Commands {
             "branches" => Ok(Commands::Branches),
             "push" => Ok(Commands::Push),
             "pull" => Ok(Commands::Pull),
-            "checkout" => Ok(Commands::Checkout),
             "remove" => Ok(Commands::Remove),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
@@ -78,7 +76,6 @@ impl Commands {
             Commands::Branches => String::from("Branches"),
             Commands::Push => String::from("Push"),
             Commands::Pull => String::from("Pull"),
-            Commands::Checkout => String::from("Checkout"),
             Commands::Remove => String::from("Remove"),
         }
     }

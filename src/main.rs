@@ -63,7 +63,6 @@ fn main() {
         Commands::Branches => cli_menus::git_branches_cli(&config).unwrap(),
         Commands::Push => cli_menus::git_push_cli().unwrap(),
         Commands::Pull => cli_menus::git_pull_cli().unwrap(),
-        Commands::Checkout => cli_menus::git_checkout_cli().unwrap(),
         Commands::Remove => cli_menus::git_remove().unwrap(),
     };
 
