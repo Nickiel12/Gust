@@ -356,12 +356,28 @@ pub fn git_undo_commit_cli(_config: &Config) -> Result<(), String> {
 
 pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
     let stdout = console::Term::stdout();
-    stdout.clear_last_lines(3).map_err(|e| e.to_string())?;
 
     let choices = vec!["Switch HEAD".to_string(), "Create new branch".to_string()];
 
     let choice = cli::choice_single(choices, String::from("Select action"), false, false)?;
+
     stdout.clear_last_lines(1).map_err(|e| e.to_string())?;
+
+    println!(
+        "{} {}: {}",
+        "✓".bright_green().to_string(),
+        "Select action".bold().to_string(),
+        {
+            match choice {
+                UserResponse::Some(val) => match val {
+                    0 => "Switch HEAD",
+                    1 => "Create New Branch",
+                    _ => "Invalid Input",
+                },
+                _ => "Invalid Input",
+            }
+        }
+    );
 
     match choice {
         UserResponse::Some(val) => match val {
@@ -415,7 +431,7 @@ pub fn git_push_cli() -> Result<(), String> {
     Ok(())
 }
 
-pub fn git_remove() -> Result<(), String> {
+pub fn git_remove_cli() -> Result<(), String> {
     let choice_remove_prompt: String = String::from("Select files to remove from tracking:");
 
     match cli::git_ls_tree()? {
@@ -429,17 +445,17 @@ pub fn git_remove() -> Result<(), String> {
                 choices.push(line.yellow().to_string());
             }
 
+            let as_cached = cli::ask_yes_no(
+                String::from("Would you like to delete the selected files from the disk?"),
+                false,
+            )?;
+
             let user_choices =
                 match cli::choice_no_limit(choices.clone(), choice_remove_prompt, true, false)? {
                     cli::UserResponse::All => utils::strip_vec_colors(choices),
                     cli::UserResponse::Some(selected) => utils::strip_vec_colors(selected),
                     cli::UserResponse::None => vec![],
                 };
-
-            let as_cached = cli::ask_yes_no(
-                String::from("Would you like to delete from the disk?"),
-                false,
-            )?;
 
             if user_choices.len() == 0 {
                 println!("{}", "Nothing selected".bright_yellow());
