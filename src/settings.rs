@@ -32,6 +32,8 @@ pub struct Config {
     pub use_important: bool,
     pub use_footers: bool,
     pub allow_none_convention: bool,
+
+    pub print_git_command: bool,
 }
 
 impl std::default::Default for Config {
@@ -51,6 +53,8 @@ impl std::default::Default for Config {
             use_important: true,
             use_footers: false,
             allow_none_convention: true,
+
+            print_git_command: true,
         }
     }
 }
