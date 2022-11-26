@@ -52,7 +52,12 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
             }
             // Not tracked
             '?' => {
-                choices.push(line[3..].bright_green().to_string());
+                // Remove any quotation marks caused by spaces in filenames
+                if line.chars().nth(3).unwrap() == '"' {
+                    choices.push(line[4..line.len() - 1].bright_green().to_string());
+                } else {
+                    choices.push(line[3..].bright_green().to_string());
+                }
             }
             // Modified from head, but not staged
             'M' => {
@@ -60,11 +65,21 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
                 match line.chars().nth(0).unwrap() {
                     // No staged changes, Added
                     ' ' | 'A' => {
-                        choices.push(line[3..].green().to_string());
+                        // Remove any quotation marks caused by spaces in filenames
+                        if line.chars().nth(3).unwrap() == '"' {
+                            choices.push(line[4..line.len() - 1].green().to_string());
+                        } else {
+                            choices.push(line[3..].green().to_string());
+                        }
                     }
                     // Modified, Deleted, Renamed, Updated but merged
                     'M' | 'D' | 'R' | 'U' => {
-                        choices.push(line[3..].yellow().to_string());
+                        // Remove any quotation marks caused by spaces in filenames
+                        if line.chars().nth(3).unwrap() == '"' {
+                            choices.push(line[4..line.len() - 1].yellow().to_string());
+                        } else {
+                            choices.push(line[3..].yellow().to_string());
+                        }
                     }
                     // Git was empty, but not?
                     _ => {
@@ -77,11 +92,21 @@ pub fn git_add_cli(config: &Config) -> Result<(), String> {
             }
             // Delete, Rename
             'D' | 'R' => {
-                choices.push(line[3..].bright_yellow().to_string());
+                // Remove any quotation marks caused by spaces in filenames
+                if line.chars().nth(3).unwrap() == '"' {
+                    choices.push(line[4..line.len() - 1].bright_yellow().to_string());
+                } else {
+                    choices.push(line[3..].bright_yellow().to_string());
+                }
             }
             // Added
             'A' => {
-                choices.push(line[3..].bright_red().to_string());
+                // Remove any quotation marks caused by spaces in filenames
+                if line.chars().nth(3).unwrap() == '"' {
+                    choices.push(line[4..line.len() - 1].bright_red().to_string());
+                } else {
+                    choices.push(line[3..].bright_red().to_string());
+                }
             }
             _ => {
                 println!("ding: {}", line);
@@ -137,7 +162,14 @@ pub fn git_reset_cli(_config: &Config) -> Result<(), String> {
             let mut choices = Vec::<String>::new();
             for line in status.lines() {
                 match line.chars().nth(0).unwrap() {
-                    'M' | 'A' | 'C' | 'D' => choices.push(line[3..].yellow().to_string()),
+                    'M' | 'A' | 'C' | 'D' => {
+                        // remove the parenthesis from long file names
+                        if line.chars().nth(3).unwrap() == '"' {
+                            choices.push(line[4..line.len() - 1].yellow().to_string());
+                        } else {
+                            choices.push(line[3..].yellow().to_string());
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -172,7 +204,13 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
             let mut choices = Vec::<String>::new();
             for line in status.lines() {
                 match line.chars().nth(0).unwrap() {
-                    'M' | 'A' | 'C' | 'D' => choices.push(line[3..].yellow().to_string()),
+                    'M' | 'A' | 'C' | 'D' => {
+                        if line.chars().nth(3).unwrap() == '"' {
+                            choices.push(line[4..line.len() - 1].yellow().to_string());
+                        } else {
+                            choices.push(line[3..].yellow().to_string());
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -214,25 +252,30 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
                 if config.use_types {
                     commit_msg.push(
                         cli::filter_choice_cli(conventions.types, true)?.unwrap_or("".to_string()),
-                    );
-                    if config.use_scope {
-                        commit_msg.push(conventions.scope_delimeters.opening.clone());
-                        commit_msg.push(
-                            cli::filter_choice_cli(conventions.scopes, true)?
-                                .unwrap_or("".to_string()),
-                        );
-                        commit_msg.push(conventions.scope_delimeters.closing.clone());
-                    }
-                    if config.use_important {
-                        if cli::ask_choice_cli(format!(
-                            "Flag this commit as important with: '{}'",
-                            conventions.important_symbol
-                        ))? {
-                            commit_msg.push(conventions.important_symbol);
+                    ); // The check against none is to skip all of the convention options
+                       // if the first is skipped
+                    if commit_msg[0] != "None" {
+                        if config.use_scope {
+                            let convention_scope =
+                                cli::filter_choice_cli(conventions.scopes, true)?
+                                    .unwrap_or("".to_string());
+                            if convention_scope != "None" {
+                                commit_msg.push(conventions.scope_delimeters.opening.clone());
+                                commit_msg.push(convention_scope);
+                                commit_msg.push(conventions.scope_delimeters.closing.clone());
+                            }
                         }
+                        if config.use_important {
+                            if cli::ask_choice_cli(format!(
+                                "Flag this commit as important with: '{}'",
+                                conventions.important_symbol
+                            ))? {
+                                commit_msg.push(conventions.important_symbol);
+                            }
+                        }
+                        commit_msg.push(conventions.separator);
+                        commit_msg.push(" ".to_string());
                     }
-                    commit_msg.push(conventions.separator);
-                    commit_msg.push(" ".to_string());
                 }
 
                 commit_msg = commit_msg
