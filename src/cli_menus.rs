@@ -235,6 +235,12 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
                     commit_msg.push(" ".to_string());
                 }
 
+                commit_msg = commit_msg
+                    .iter()
+                    .filter(|x| x != &&String::from("None"))
+                    .cloned()
+                    .collect();
+
                 let usr_selection: String = Input::with_theme(&ColorfulTheme::default())
                     .allow_empty(false)
                     .with_initial_text(commit_msg.join(""))
