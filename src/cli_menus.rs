@@ -318,7 +318,7 @@ pub fn git_undo_commit_cli(_config: &Config) -> Result<(), String> {
     let choice_undo_prompt: String = String::from("Select a commit to revert:");
 
     let log_output: String;
-    match cli::git_log()? {
+    match cli::git_log(None)? {
         None => {
             println!("{}", "No commits found! returning to menu".bright_yellow());
             return Ok(());
@@ -410,8 +410,87 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
                 }
             },
             1 => {
-                let name = cli::get_input("Enter new branch name: ".to_string())?;
-                cli::git_create_branch(name)?;
+                let specific_commit_prompt =
+                    String::from("Would you like to start the branch on a specific commit?");
+
+                let select_commit_prompt =
+                    String::from("Select a commit to base the new branch on:");
+
+                // ask the user if they want to base the new branch on a specific commit
+                if cli::ask_choice_cli(specific_commit_prompt)? {
+                    let select_branch_prompt = "Select the branch the commit is on:"
+                        .bright_yellow()
+                        .to_string();
+
+                    // Get the branch that the commit is on (for ease of use)
+                    let branch = match cli::git_get_branches()? {
+                        // Make sure there is a response from `git branch`
+                        Some(branches) => {
+                            // get the user to choose a branch
+                            match cli::choice_single(
+                                branches.clone(),
+                                select_branch_prompt,
+                                false,
+                                false,
+                            )? {
+                                UserResponse::Some(index) => {
+                                    let branch = utils::strip_colors(branches[index].clone());
+                                    if branch.contains("remotes/") {
+                                        cli::git_fetch()?;
+                                    }
+
+                                    branch
+                                }
+                                _ => panic!("You should not be in this specfics place 121212"),
+                            }
+                        }
+                        None => {
+                            panic!("{}", "You have no branches here".bright_red());
+                        }
+                    };
+
+                    // Get the `git log` history on the chosen branch
+                    let choices = match cli::git_log(Some(branch))? {
+                        None => {
+                            println!("{}", "No commits found! returning to menu".bright_yellow());
+                            return Ok(());
+                        }
+                        Some(log_string) => {
+                            let mut output = Vec::<String>::new();
+                            for line in log_string.lines() {
+                                output.push(line.to_string());
+                            }
+                            output
+                        }
+                    };
+
+                    // Have the user select the commit to base the branch on
+                    let usr_selected =
+                        cli::choice_single(choices.clone(), select_commit_prompt, false, true)?;
+
+                    match usr_selected {
+                        UserResponse::None => {
+                            println!("'None' selected, returning to menu");
+                            return Ok(());
+                        }
+                        UserResponse::Some(choice) => {
+                            let hash = choices[choice][..7].to_string();
+                            println!("You have selected commit {}", hash);
+
+                            let name = cli::get_input("Enter new branch name: ".to_string())?;
+
+                            cli::git_create_branch(name, Some(hash))?;
+
+                            return Ok(());
+                        }
+                        UserResponse::All => panic!(
+                            "This code should be unreachable cli.rs - git-branch, usr_selected"
+                        ),
+                    }
+                } else {
+                    let name = cli::get_input("Enter new branch name: ".to_string())?;
+                    cli::git_create_branch(name, None)?;
+                }
             }
             _ => return Err("Wow, I don't even know what to say...\n Goodbye".to_string()),
         },

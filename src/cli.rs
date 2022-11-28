@@ -215,13 +215,22 @@ pub fn git_fetch() -> Result<(), String> {
     Ok(())
 }
 
-pub fn git_log() -> Result<Option<String>, String> {
-    let git_log_cmd = Command::new("git")
-        .arg("log")
-        .arg("--oneline")
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("Couldn't call git log --oneline!");
+pub fn git_log(branch: Option<String>) -> Result<Option<String>, String> {
+    let git_log_cmd = match branch {
+        Some(branch_src) => Command::new("git")
+            .arg("log")
+            .arg("--oneline")
+            .arg(branch_src)
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Couldn't call git log --oneline!"),
+        None => Command::new("git")
+            .arg("log")
+            .arg("--oneline")
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Couldn't call git log --oneline!"),
+    };
 
     let git_log = git_log_cmd.wait_with_output().map_err(|e| e.to_string())?;
 
@@ -237,12 +246,23 @@ pub fn git_log() -> Result<Option<String>, String> {
     }
 }
 
-pub fn git_create_branch(new_branch: String) -> Result<(), String> {
-    let git_create_branch_cmd = Command::new("git")
-        .arg("branch")
-        .arg(new_branch)
-        .spawn()
-        .expect("Coun't create new branch");
+pub fn git_create_branch(
+    new_branch: String,
+    starting_commit_hash: Option<String>,
+) -> Result<(), String> {
+    let git_create_branch_cmd = match starting_commit_hash {
+        Some(commit_hash) => Command::new("git")
+            .arg("branch")
+            .arg(new_branch)
+            .arg(commit_hash)
+            .spawn()
+            .expect("Coun't create new branch"),
+        None => Command::new("git")
+            .arg("branch")
+            .arg(new_branch)
+            .spawn()
+            .expect("Coun't create new branch"),
+    };
 
     let output = git_create_branch_cmd
         .wait_with_output()
