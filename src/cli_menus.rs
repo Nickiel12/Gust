@@ -524,7 +524,7 @@ pub fn git_remove_cli() -> Result<(), String> {
                 choices.push(line.yellow().to_string());
             }
 
-            let as_cached = cli::ask_yes_no(
+            let as_cached = !cli::ask_yes_no(
                 String::from("Would you like to delete the selected files from the disk?"),
                 false,
             )?;
