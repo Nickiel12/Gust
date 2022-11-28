@@ -204,7 +204,7 @@ pub fn git_get_branches() -> Result<Option<Vec<String>>, String> {
 }
 
 pub fn git_fetch() -> Result<(), String> {
-    let cmd = Command::new("git")
+    Command::new("git")
         .arg("fetch")
         .arg("--all")
         .spawn()
@@ -216,21 +216,27 @@ pub fn git_fetch() -> Result<(), String> {
 }
 
 pub fn git_log(branch: Option<String>) -> Result<Option<String>, String> {
-    let git_log_cmd = match branch {
-        Some(branch_src) => Command::new("git")
-            .arg("log")
-            .arg("--oneline")
-            .arg(branch_src)
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("Couldn't call git log --oneline!"),
-        None => Command::new("git")
-            .arg("log")
-            .arg("--oneline")
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("Couldn't call git log --oneline!"),
-    };
+    let mut args = vec![];
+    
+    if branch.is_some() {
+        args.push(branch.unwrap());
+    }
+
+    let git_log_cmd = Command::new("git")
+        .arg("log")
+        .arg("--oneline")
+        .args(args)
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git log --oneline!");
+    
+    let git_log_cmd = Command::new("git")
+        .arg("log")
+        .arg("--oneline")
+        .args(args)
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Couldn't call git log --oneline!");
 
     let git_log = git_log_cmd.wait_with_output().map_err(|e| e.to_string())?;
 
@@ -250,19 +256,23 @@ pub fn git_create_branch(
     new_branch: String,
     starting_commit_hash: Option<String>,
 ) -> Result<(), String> {
-    let git_create_branch_cmd = match starting_commit_hash {
-        Some(commit_hash) => Command::new("git")
-            .arg("branch")
-            .arg(new_branch)
-            .arg(commit_hash)
-            .spawn()
-            .expect("Coun't create new branch"),
-        None => Command::new("git")
-            .arg("branch")
-            .arg(new_branch)
-            .spawn()
-            .expect("Coun't create new branch"),
-    };
+    let mut args = vec![];
+
+    if starting_commit_hash.is_some() {
+        args.push(starting_commit_hash.unwrap());
+    }
+
+    let git_create_branch_cmd = Command::new("git")
+        .arg("branch")
+        .args(args)
+        .spawn()
+        .expect("Coun't create new branch");
+
+    let git_create_branch_cmd = Command::new("git")
+        .arg("branch")
+        .args(args)
+        .spawn()
+        .expect("Coun't create new branch");
 
     let output = git_create_branch_cmd
         .wait_with_output()
@@ -435,23 +445,19 @@ pub fn git_ls_tree() -> Result<Option<String>, String> {
 }
 
 pub fn git_rm(files: Vec<String>, as_cached: bool) -> Result<(), String> {
-    let git_rm_cmd = {
-        if as_cached {
-            Command::new("git")
-                .arg("rm")
-                .arg("--cached")
-                .args(files)
-                .spawn()
-                .expect("Couldn't run `git add`")
-        } else {
-            Command::new("git")
-                .arg("rm")
-                .arg("--cached")
-                .args(files)
-                .spawn()
-                .expect("Couldn't run `git add`")
-        }
-    };
+    let mut args = vec![];
+
+    if as_cached {
+        args.push(String::from("--cached"));
+    }
+
+    args.append(&mut files.clone());
+
+    let git_rm_cmd = Command::new("git")
+        .arg("rm")
+        .args(args)
+        .spawn()
+        .expect("Couldn't run `git add`");
 
     let output = git_rm_cmd.wait_with_output().map_err(|e| e.to_string())?;
 
