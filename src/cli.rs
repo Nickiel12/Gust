@@ -217,19 +217,11 @@ pub fn git_fetch() -> Result<(), String> {
 
 pub fn git_log(branch: Option<String>) -> Result<Option<String>, String> {
     let mut args = vec![];
-    
+
     if branch.is_some() {
         args.push(branch.unwrap());
     }
 
-    let git_log_cmd = Command::new("git")
-        .arg("log")
-        .arg("--oneline")
-        .args(args)
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("Couldn't call git log --oneline!");
-    
     let git_log_cmd = Command::new("git")
         .arg("log")
         .arg("--oneline")
@@ -261,12 +253,6 @@ pub fn git_create_branch(
     if starting_commit_hash.is_some() {
         args.push(starting_commit_hash.unwrap());
     }
-
-    let git_create_branch_cmd = Command::new("git")
-        .arg("branch")
-        .args(args)
-        .spawn()
-        .expect("Coun't create new branch");
 
     let git_create_branch_cmd = Command::new("git")
         .arg("branch")
