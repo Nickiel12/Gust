@@ -4,7 +4,7 @@ pub use commands::{BasicCommands, Commands};
 mod utils;
 
 mod cli;
-mod cli_menus;
+mod menus;
 mod settings;
 
 use clap::Parser;
@@ -48,22 +48,22 @@ fn main() {
         }
         None => {
             if config.enable_basic_menu {
-                command = cli_menus::basic_menu().unwrap();
+                command = menus::basic_menu().unwrap();
             } else {
-                command = cli_menus::advanced_menu().unwrap();
+                command = menus::advanced_menu().unwrap();
             }
         }
     }
 
     let _result = match command {
-        Commands::Add => cli_menus::git_add_cli(&config).unwrap(),
-        Commands::Reset => cli_menus::git_reset_cli(&config).unwrap(),
-        Commands::Commit => cli_menus::git_commit_cli(&config).unwrap(),
-        Commands::UndoCommit => cli_menus::git_undo_commit_cli(&config).unwrap(),
-        Commands::Branches => cli_menus::git_branches_cli(&config).unwrap(),
-        Commands::Push => cli_menus::git_push_cli().unwrap(),
-        Commands::Pull => cli_menus::git_pull_cli().unwrap(),
-        Commands::Remove => cli_menus::git_remove_cli().unwrap(),
+        Commands::Add => menus::git_add_cli(&config).unwrap(),
+        Commands::Reset => menus::git_reset_cli(&config).unwrap(),
+        Commands::Commit => menus::git_commit_cli(&config).unwrap(),
+        Commands::UndoCommit => menus::git_undo_commit_cli(&config).unwrap(),
+        Commands::Branches => menus::git_branches_cli(&config).unwrap(),
+        Commands::Push => menus::git_push_cli().unwrap(),
+        Commands::Pull => menus::git_pull_cli().unwrap(),
+        Commands::Remove => menus::git_remove_cli().unwrap(),
     };
 
     settings::save_config(config).unwrap();
