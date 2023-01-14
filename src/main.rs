@@ -67,6 +67,7 @@ fn main() {
             Commands::Pull => menus::git_pull_cli().unwrap(),
             Commands::Remove => menus::git_remove_cli().unwrap(),
         };
+        println!("");
     }
 
     settings::save_config(config).unwrap();
