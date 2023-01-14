@@ -36,35 +36,38 @@ fn main() {
 
     settings::check_for_convention_file(&config).unwrap();
 
-    let command;
-    match args.command.clone() {
-        Some(com) => {
-            command = match Commands::from_string(com) {
-                Ok(value) => value,
-                Err(_) => {
-                    panic!("Unknown Command: {:?}", args.command.unwrap().red())
+    let do_loop: bool = true;
+    while do_loop {
+        let command;
+        match args.command.clone() {
+            Some(com) => {
+                command = match Commands::from_string(com) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        panic!("Unknown Command: {:?}", args.command.unwrap().red())
+                    }
+                }
+            }
+            None => {
+                if config.enable_basic_menu {
+                    command = menus::basic_menu().unwrap();
+                } else {
+                    command = menus::advanced_menu().unwrap();
                 }
             }
         }
-        None => {
-            if config.enable_basic_menu {
-                command = menus::basic_menu().unwrap();
-            } else {
-                command = menus::advanced_menu().unwrap();
-            }
-        }
-    }
 
-    let _result = match command {
-        Commands::Add => menus::git_add_cli(&config).unwrap(),
-        Commands::Reset => menus::git_reset_cli(&config).unwrap(),
-        Commands::Commit => menus::git_commit_cli(&config).unwrap(),
-        Commands::UndoCommit => menus::git_undo_commit_cli(&config).unwrap(),
-        Commands::Branches => menus::git_branches_cli(&config).unwrap(),
-        Commands::Push => menus::git_push_cli().unwrap(),
-        Commands::Pull => menus::git_pull_cli().unwrap(),
-        Commands::Remove => menus::git_remove_cli().unwrap(),
-    };
+        let _result = match command {
+            Commands::Add => menus::git_add_cli(&config).unwrap(),
+            Commands::Reset => menus::git_reset_cli(&config).unwrap(),
+            Commands::Commit => menus::git_commit_cli(&config).unwrap(),
+            Commands::UndoCommit => menus::git_undo_commit_cli(&config).unwrap(),
+            Commands::Branches => menus::git_branches_cli(&config).unwrap(),
+            Commands::Push => menus::git_push_cli().unwrap(),
+            Commands::Pull => menus::git_pull_cli().unwrap(),
+            Commands::Remove => menus::git_remove_cli().unwrap(),
+        };
+    }
 
     settings::save_config(config).unwrap();
 }
