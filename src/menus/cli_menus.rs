@@ -19,6 +19,7 @@ pub fn basic_menu() -> Result<Commands, String> {
         BasicCommands::Reset => Ok(Commands::Reset),
         BasicCommands::Commit => Ok(Commands::Commit),
         BasicCommands::AdvancedOptions => advanced_menu(),
+        BasicCommands::Quit => Ok(Commands::Quit),
     };
     return result;
 }

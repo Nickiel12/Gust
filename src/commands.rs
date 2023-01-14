@@ -9,6 +9,7 @@ pub enum BasicCommands {
     Reset,
     Commit,
     AdvancedOptions,
+    Quit,
 }
 
 impl BasicCommands {
@@ -18,6 +19,7 @@ impl BasicCommands {
             "reset" => Ok(BasicCommands::Reset),
             "commit" => Ok(BasicCommands::Commit),
             "advanced options" => Ok(BasicCommands::AdvancedOptions),
+            "quit" => Ok(BasicCommands::Quit),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
@@ -28,6 +30,7 @@ impl BasicCommands {
             BasicCommands::Reset => String::from("Reset"),
             BasicCommands::Commit => String::from("Commit"),
             BasicCommands::AdvancedOptions => String::from("Advanced Options"),
+            BasicCommands::Quit => String::from("Quit"),
         }
     }
 
@@ -50,6 +53,7 @@ pub enum Commands {
     Push,
     Pull,
     Remove,
+    Quit,
 }
 
 impl Commands {
@@ -63,6 +67,7 @@ impl Commands {
             "push" => Ok(Commands::Push),
             "pull" => Ok(Commands::Pull),
             "remove" => Ok(Commands::Remove),
+            "quit" => Ok(Commands::Quit),
             _ => Err(format!("{} {}", "Unrecognized command: {}".red(), input)),
         }
     }
@@ -77,6 +82,7 @@ impl Commands {
             Commands::Push => String::from("Push"),
             Commands::Pull => String::from("Pull"),
             Commands::Remove => String::from("Remove"),
+            Commands::Quit => String::from("Quit"),
         }
     }
 

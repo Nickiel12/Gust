@@ -66,6 +66,7 @@ fn main() {
             Commands::Push => menus::git_push_cli().unwrap(),
             Commands::Pull => menus::git_pull_cli().unwrap(),
             Commands::Remove => menus::git_remove_cli().unwrap(),
+            Commands::Quit => break,
         };
         println!("");
     }
