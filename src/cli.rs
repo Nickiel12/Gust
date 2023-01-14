@@ -254,6 +254,8 @@ pub fn git_create_branch(
         args.push(starting_commit_hash.unwrap());
     }
 
+    args.push(new_branch);
+
     let git_create_branch_cmd = Command::new("git")
         .arg("branch")
         .args(args)
@@ -446,6 +448,26 @@ pub fn git_rm(files: Vec<String>, as_cached: bool) -> Result<(), String> {
         .expect("Couldn't run `git add`");
 
     let output = git_rm_cmd.wait_with_output().map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    } else {
+        println!("{}", "Files no longer tracking!".bright_green());
+        Ok(())
+    }
+}
+
+pub fn git_branch_delete(branch: String) -> Result<(), String> {
+    let git_branch_cmd = Command::new("git")
+        .arg("branch")
+        .arg("-D")
+        .arg(branch)
+        .spawn()
+        .expect("Couldn't run `git branch -D' for that branch");
+
+    let output = git_branch_cmd
+        .wait_with_output()
+        .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());

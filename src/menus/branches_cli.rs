@@ -8,7 +8,11 @@ use console;
 pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
     let stdout = console::Term::stdout();
 
-    let choices = vec!["Switch HEAD".to_string(), "Create new branch".to_string()];
+    let choices = vec![
+        "Switch HEAD".to_string(),
+        "Create new branch".to_string(),
+        "Delete a Branch".to_string(),
+    ];
 
     let choice = cli::choice_single(choices, String::from("Select action"), false, false)?;
 
@@ -23,6 +27,7 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
                 UserResponse::Some(val) => match val {
                     0 => "Switch HEAD",
                     1 => "Create New Branch",
+                    2 => "Delete a Branch",
                     _ => "Invalid Input",
                 },
                 _ => "Invalid Input",
@@ -56,7 +61,7 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
                             cli::git_checkout(branches)?;
                             return Ok(());
                         }
-                        _ => return Err("How did you do that one!".to_string()),
+                        _ => return Err("How did you break that one!?".to_string()),
                     }
                 }
             },
@@ -143,6 +148,48 @@ pub fn git_branches_cli(_config: &Config) -> Result<(), String> {
                     cli::git_create_branch(name, None)?;
                 }
             }
+            2 => match cli::git_get_branches()? {
+                None => println!("{}", "You have no branches here".bright_red()),
+                Some(branches) => {
+                    let target = cli::choice_single(
+                        branches.clone(),
+                        "Select the branch you wish to delete"
+                            .bright_yellow()
+                            .to_string(),
+                        false,
+                        false,
+                    )?;
+
+                    match target {
+                        UserResponse::Some(index) => {
+                            let branch = utils::strip_colors(branches[index].clone());
+
+                            match cli::ask_yes_no(
+                                format!("Are you sure you wish to delete this branch?: {}", branch),
+                                false,
+                            ) {
+                                Err(err) => {
+                                    println!("{}: {}", "There was an error getting user's consent to delete the branch".bright_red().to_string(), err.as_str());
+                                    return Ok(());
+                                }
+                                Ok(yes_bool) => {
+                                    if yes_bool {
+                                        cli::git_branch_delete(branch)?;
+                                    } else {
+                                        println!("User canceled the branch deletion");
+                                        return Ok(());
+                                    }
+                                }
+                            }
+                        }
+                        _ => {
+                            return Err(
+                                "There was an error while user choosing the branch".to_string()
+                            )
+                        }
+                    }
+                }
+            },
             _ => return Err("Wow, I don't even know what to say...\n Goodbye".to_string()),
         },
         _ => return Err("You achieved the impossible".to_string()),
