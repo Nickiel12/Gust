@@ -2,6 +2,7 @@
 
 <p align="center">
     <img src="GustIcon.svg#gh-dark-mode-only" width="800" alt="Gust logo">
+    <img src="GustIcon_lightmode.svg#gh-light-mode-only" width="800" alt="Gust logo">
 </p>
 
 ## A Git TUI written in Rust
