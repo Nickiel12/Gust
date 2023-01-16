@@ -1,7 +1,7 @@
 # Gust
 
 <p align="center">
-    <img src="GustIcon.svg" width="800" alt="Gust logo">
+    <img src="GustIcon.svg#gh-dark-mode-only" width="800" alt="Gust logo">
 </p>
 
 ## A Git TUI written in Rust
