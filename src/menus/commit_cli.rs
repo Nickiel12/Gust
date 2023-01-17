@@ -46,15 +46,11 @@ pub fn git_commit_cli(config: &Config) -> Result<(), String> {
                     false
                 }
             } else {
-                if cli::ask_choice_cli(format!(
+                cli::ask_choice_cli(format!(
                     "{}:\n{}",
                     "Commit the following files?",
                     choices.join("\n")
-                ))? {
-                    true
-                } else {
-                    false
-                }
+                ))?
             }
         }
     };

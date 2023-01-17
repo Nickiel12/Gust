@@ -54,7 +54,7 @@ pub fn filter_choice_cli(
     }
     let selection = FuzzySelect::with_theme(&theme::ColorfulTheme::default())
         .items(&choices)
-        .with_prompt("Please choose a menu:")
+        .with_prompt("Select one:")
         .default(1)
         .interact_on_opt(&console::Term::stderr())
         .expect("Couldn't fuzzy search");
