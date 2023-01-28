@@ -13,5 +13,6 @@
  pkgs.mkShell {
    buildInputs = with pkgs; [
      ruststable
+     rust-analyzer
    ];
  }
