@@ -30,6 +30,7 @@ fn main() {
         "\n"
             .bright_red(),
     );
+
     let args = CliArguments::parse();
 
     let mut config = settings::load_config().unwrap();
