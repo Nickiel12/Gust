@@ -15,4 +15,8 @@
      ruststable
      rust-analyzer
    ];
+   shellHook = ''
+  cargo install --locked bacon
+  export PATH=$HOME/.cargo/bin:$PATH
+'';
  }

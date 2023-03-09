@@ -1,4 +1,3 @@
-use colored::Colorize;
 use console::Term;
 
 pub fn main_menu() -> Result<usize, std::io::Error> {
